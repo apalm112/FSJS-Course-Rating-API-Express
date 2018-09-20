@@ -1,0 +1,9 @@
+# dependencies
+/.node_modules
+
+# testing
+/test
+
+npm-debug.log*
+
+.eslintrc
