@@ -1,5 +1,7 @@
+.gitignore
+
 # dependencies
-/.node_modules
+node_modules
 
 # testing
 /test
@@ -7,3 +9,6 @@
 npm-debug.log*
 
 .eslintrc.json
+
+# mockup database to use w/ Postman
+CourseAPI.postman_collection.json
