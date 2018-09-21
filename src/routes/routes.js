@@ -164,16 +164,20 @@ router.post('/courses/:coursesId/:reviews', mid.credentials, (req, res, next) =>
 
 	var review = new Review(req.body);
 
-	review.validateReview(courseUserId, courseBeingPostedToId, potato, function(error) {
-		if(error) return next(error);
-	});
-		// Sauce:  https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
-	req.course.reviews.push(potato);
-	req.course.save(req.course);
-	review.save(function(error, reviews) {
-		if(error) return next(error);
-		res.redirect('/api/courses/' + courseBeingPostedToId);
-		res.status(201);
+	review.validateReview(courseUserId, reviewBeingPostedByUserId, function(error) {
+		if(error) {
+			return next(error);
+		} else {
+			// Sauce:  https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
+			req.course.reviews.push(reviewBeingPostedByUserId);
+			req.course.save(req.course);
+			review.save(function(error, reviews) {
+				if(error) return next(error);
+				res.redirect('/api/courses/' + courseBeingPostedToId);
+				res.status(201);
+			});
+			
+		}
 	});
 });
 /* End Routes *****************************************************/

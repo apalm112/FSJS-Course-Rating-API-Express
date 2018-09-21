@@ -97,7 +97,7 @@ UserSchema.pre('save', function(next) {
 });
 
 // Validation to prevent a user from reviewing their own course.  Which gets run when a new review is about to be inserted into the Review Collection. The `router.params` route gets the courseId, pass that into a method call to here, process it & then send it back.
-ReviewSchema.method('validateReview', function(var1, var2, var3, callback) {
+ReviewSchema.method('validateReview', function(var1, var3, callback) {
 	var review = this;
 	var userIDObject = var1;
 	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);
@@ -105,16 +105,16 @@ ReviewSchema.method('validateReview', function(var1, var2, var3, callback) {
 	// console.log('actualCourseUserId and typeof:', actualCourseUserId, (typeof actualCourseUserId));// is an Object!
 	// Its getting Double quotes around it in the Node Debugger!
 	// get the :courseId from req.params & store it in a variable.
-	var courseBeingPostedToId = var2;
+	// var courseBeingPostedToId = var2;
 	// get the usersId from the req.body
 	var reviewBeingPostedByUserId = var3;
 	// console.log('reviewBeingPostedByUserId and typeof:', reviewBeingPostedByUserId, (typeof reviewBeingPostedByUserId));
 		console.log(( actualCourseUserId === reviewBeingPostedByUserId ));
 		// This calls next() if the user is not posting a review to their own course.
-	if ( !(actualCourseUserId === reviewBeingPostedByUserId) ) {
+	if ( (actualCourseUserId === reviewBeingPostedByUserId) ) {
 		callback();
 	} else {
-		let error = new Error('User not allowed to post review on your own course.');
+		var error = new Error('User not allowed to post review on your own course.');
 		error.status = 401;
 		callback(error);
 	}
