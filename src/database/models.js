@@ -10,19 +10,19 @@ const validator = function(val){
 	// From Treehouse Link, Sauce:  http://emailregex.com/
 	//   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 	var checkEmail = val.match((/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/));
- if (checkEmail !== null) {
-	 return true;
- } else if (!checkEmail) {
-	 return false;
- }
-}
+	if (checkEmail !== null) {
+		return true;
+	} else if (!checkEmail) {
+		return false;
+	}
+};
 
 //	DONE: emailAddress (String, required, must be unique and in correct format)
 var UserSchema = new Schema({
 	// _id: { type: mongoose.Schema.Types.ObjectId, required: true, auto: true },
- fullName: 		 { type: String, required: true, trim: true },
- emailAddress: { type: String,  required: true,  validate: validator },
- password:		 { type: String, required: true }
+	fullName: 		 { type: String, required: true, trim: true },
+	emailAddress: { type: String,  required: true,  validate: validator },
+	password:		 { type: String, required: true }
 });
 
 var ReviewSchema = new Schema({
@@ -70,16 +70,16 @@ UserSchema.statics.authenticate = function(email, password, callback) {
 						error.status = 401;
 						return callback(error);
 					}
-				})
+				});
 			}
 		});
-}
+};
 
 
 // DONE: Create a pre save hook on the user schema that uses the bcrypt npm package to hash the user's password.
 // A pre save hook on the user schema encrypts the password property before saving it to the database
 /* Mongoose Pre-Hook:   is a type of middleware. */
-	UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function(next) {
 		/*
 				Due to the nature of this in an arrow function you can't use them for Mongoose hooks. this in arrow functions aren't rebindable, but Mongoose wants to rebind this to be the document being saved. You should use an anonymous function instead (i.e., function() {})
 				`.pre()` is Mongoose hook.
@@ -113,13 +113,13 @@ ReviewSchema.method('validateReview', function(var1, var2, var3, callback) {
 	// console.log('reviewBeingPostedByUserId and typeof:', reviewBeingPostedByUserId, (typeof reviewBeingPostedByUserId));
 		console.log(( actualCourseUserId === reviewBeingPostedByUserId ));
 		// This calls next() if the user is not posting a review to their own course.
-		if ( !(actualCourseUserId === reviewBeingPostedByUserId) ) {
-			callback();
-		} else {
-			let error = new Error('User not allowed to post review on your own course.');
-			error.status = 401;
-			callback(error);
-		}
+	if ( !(actualCourseUserId === reviewBeingPostedByUserId) ) {
+		callback();
+	} else {
+		let error = new Error('User not allowed to post review on your own course.');
+		error.status = 401;
+		callback(error);
+	}
 });
 
 var User = mongoose.model('User', UserSchema);
