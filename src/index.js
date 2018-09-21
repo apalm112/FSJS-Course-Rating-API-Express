@@ -56,8 +56,7 @@ app.get('/', (req, res) => {
 
 // Catches requests that fall through w/out triggering any route handlers, send 404 if no other route matched
 app.use((req, res, next) => {
-<<<<<<< Updated upstream
-	let error = new Error('Course-API Route Not Found.');
+	let error = new Error('Something went horribly wrong.  API Route Not Found.');
 =======
 	let error = new Error('Something went horribly wrong.  API Route Not Found.');
 >>>>>>> Stashed changes
