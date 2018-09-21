@@ -12,17 +12,17 @@ const Course = require('../database/models').Course;
 const Review = require('../database/models').Review;
 
 // require custom middleware function
-const middle = require('./middleware').credentials;
+const mid = require('./middleware');
 
 /* User Routes *******************************************************/
 // TODO:  Returns the currently authenticated user, ?UNIT TESTS?
-router.get('/users', middle, (req, res, next) => {
+router.get('/users', mid.credentials, (req, res, next) => {
 	// When a User makes a request to the `GET /api/users` route with the correct credentials, the corresponding user document is returned.
 	console.log(req.body.user);
 	var user = req.body.user;
 	if (!user) {
 		res.status(401).json({
-			status: 'gnot ok',
+			status: 'not ok',
 			data: null
 		});
 	} else {
@@ -63,30 +63,26 @@ router.param('coursesId',(req, res, next, id) => {
 	// Param route uses mongodb navtive method to validate the ObjectId, sauce: https://stackoverflow.com/questions/11985228/mongodb-node-check-if-objectid-is-valid
 	// console.log(objectID.isValid(id));
 	if ( !objectID.isValid(id) ) {
-		let error = new Error('Course ID is a Invalid Format!!');
+		var error = new Error('Course ID is a Invalid Format!!');
 		error.status = 404;
 		return next(error);
 	} else {
 // IDEA: Avoid exporting/requiring models — if any have refs to other models this can lead to a dependency nightmare. Use var User = mongoose.model('user') instead of require.  Sauce: https://stackoverflow.com/a/19051909/6495470
 		Course
 			.findById(id)
-			.populate( 'user', 'fullName' )//<--This one Works! works w/out 'course' too.
-			// .deepPopulate([ 'reviews.user'  ] )//<--TODO return only review user name.
-
-			.populate({ path: 'reviews', populate: { path: 'user', select: 'fullName' }})	//<--DONE WORKS W/OUT deepPopulate PLUGIN!
-
-
+			.populate( 'user', 'fullName' )
+			.populate({ path: 'reviews', populate: { path: 'user', select: 'fullName' }})
 			.exec(function(error, course) {
 			// console.log(course.reviews, course.user);
-			if(error) return next(error);
-			if(!course) {
-				error = new Error('api Course ID Not Found!');
-				error.status = 404;
-				return next(error);
-			}
-			req.course = course;
-			return next();
-		});	// end findById()
+				if(error) return next(error);
+				if(!course) {
+					var error = new Error('api Course ID Not Found!');
+					error.status = 404;
+					return next(error);
+				}
+				req.course = course;
+				return next();
+			});	// end findById()
 	}  // end else
 });	// end param()
 
@@ -113,7 +109,7 @@ router.get('/courses/:coursesId', (req, res) => {
 });
 
 // DONE: POST new individual Course. Creates a course, sets the Location header, and returns no content
-router.post('/courses', middle, (req, res, next) => {
+router.post('/courses', mid.credentials, (req, res, next) => {
 	// console.log(req.body);
 	var course = new Course(req.body);
 	course.save(function(error, course) {
@@ -124,18 +120,18 @@ router.post('/courses', middle, (req, res, next) => {
 });
 
 // DONE: Updates a course and returns no content PUT individual Course by _id.
-router.put('/courses/:coursesId', middle, (req, res, next) => {
+router.put('/courses/:coursesId', mid.credentials, (req, res, next) => {
 	// Course.findById(req.params.id)
 console.log(req.course);
 // Deprecation Warning: Use updateOne() instead.
 	req.course.update(req.body, function(error, courses) {
-			if(error) return next(error);
-			res.redirect('/');	// Sets the location header.
-			res.status(204);	// Is returning 302
+		if(error) return next(error);
+		res.redirect('/');	// Sets the location header.
+		res.status(204);	// Is returning 302
 	});
 });
 
-router.param('reviews',(req, res, next, id) => {
+router.param('reviews', (req, res, next, id) => {
 	// This param route validates the incoming user _id.  Invalid ones get an error message, while valide ones are allowed to continue onto the next middleware.
 	// Param route uses mongodb navtive method to validate the ObjectId, sauce: https://stackoverflow.com/questions/11985228/mongodb-node-check-if-objectid-is-valid
 	// console.log(objectID.isValid(id));
@@ -145,7 +141,7 @@ router.param('reviews',(req, res, next, id) => {
 	// console.log('====ufo=====typeof============>', ufo, (typeof ufo) );
 	console.log(objectID.isValid(ufo));
 	if ( !objectID.isValid(ufo) ) {
-		let error = new Error('USER ID is a Invalid Format!! router.param(reviews) line 221 ');
+		var error = new Error('USER ID is a Invalid Format!! router.param(reviews) line 144 ');
 		error.status = 404;
 		return next(error);
 	} else {
@@ -155,7 +151,7 @@ router.param('reviews',(req, res, next, id) => {
 
 // POST new individual Review. DONE: Creates a review for the specified course ID, sets the Location header to the related course, and returns no content.
 // // TODO: TWO: A User can use a correct pair of email & password to POST a new Review WHILE using a different user: ObjectId than the one that matches to the given email/password combo.
-router.post('/courses/:coursesId/:reviews', middle, (req, res, next) => {
+router.post('/courses/:coursesId/:reviews', mid.credentials, (req, res, next) => {
 	// Put the userId into a variable in order to pass it into the static methon on the Course Model.
 	// DONE: ONE: Fix this static method call so it can work for the Review Model instead of the Course Model.
 
@@ -169,16 +165,16 @@ router.post('/courses/:coursesId/:reviews', middle, (req, res, next) => {
 	var review = new Review(req.body);
 
 	review.validateReview(courseUserId, courseBeingPostedToId, potato, function(error) {
-			if(error) return next(error);
-		});
+		if(error) return next(error);
+	});
 		// Sauce:  https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
-			req.course.reviews.push(potato);
-			req.course.save(req.course);
-			review.save(function(error, reviews) {
-				if(error) return next(error);
-				res.redirect('/api/courses/' + courseBeingPostedToId);
-				res.status(201);
-		});
+	req.course.reviews.push(potato);
+	req.course.save(req.course);
+	review.save(function(error, reviews) {
+		if(error) return next(error);
+		res.redirect('/api/courses/' + courseBeingPostedToId);
+		res.status(201);
+	});
 });
 /* End Routes *****************************************************/
 module.exports = router;

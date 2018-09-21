@@ -1,8 +1,8 @@
 'use strict';
 
 /* Custom middleware for Project 11 to check for Header Authentiation **************/
-var User = require('../database/models').User;
 const auth = require('basic-auth');
+var User = require('../database/models').User;
 
 function credentials(req, res, next) {
 	// TODO: potential fix, password Authorization is not working on 'get /users' route.
@@ -12,10 +12,14 @@ function credentials(req, res, next) {
 		User.authenticate(getAuth.name, getAuth.pass, function(error, user) {
 			if ( !user ) {
 				return next(error);
+			} else if (error) {
+				var error = new Error('Error message from custom middleware, figure it out...');
+				error.status = 401;
+				return next(error);
 			} else {
 				res.locals.user = user.id;
 				req.body.user = user;
-				next(user);
+				next();
 			}
 		});
 	} else {

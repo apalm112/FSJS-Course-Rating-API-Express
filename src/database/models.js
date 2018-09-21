@@ -53,8 +53,10 @@ var CourseSchema = new Schema({
 UserSchema.statics.authenticate = function(email, password, callback) {
 	User.findOne({ emailAddress: email })
 		.exec(function(error, user) {
-			if ( !user ) {
-				error = new Error('Invalid Email address entered.');
+			if(error) {
+				return callback(error);
+			} else if ( !user ) {
+				var error = new Error('Invalid Email address entered.');
 				error.status = 401;
 				return callback(error);
 			} else {
@@ -64,7 +66,7 @@ UserSchema.statics.authenticate = function(email, password, callback) {
 						return callback(null, user);
 					} else {
 						console.log('pasword hash NO match');
-						error = new Error('Invalid password entered.');
+						var error = new Error('Invalid password entered.');
 						error.status = 401;
 						return callback(error);
 					}
