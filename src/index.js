@@ -30,8 +30,8 @@ app.get('/', (req, res) => {
 app.use((req, res) => {
 	res.status(404).json({
 		message: 'Route Not Found'
-	})
-})
+	});
+});
 
 // global error handler
 app.use((err, req, res, next) => {
