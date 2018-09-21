@@ -40,14 +40,14 @@ app.use('/api', routes);
 // send a friendly greeting for the root route
 app.get('/', (req, res) => {
 	res.json({
-		message: 'Welcome to the Course Review API, such wow.'
+		message: 'Welcome to the Course-API, such wow.'
 	});
 });
 
 // Catches requests that fall through w/out triggering any route handlers, send 404 if no other route matched
 app.use((req, res, next) => {
-	let error = new Error('\x1b[31m%s\x1b[0m', 'Course-API Route Not Found.');
-	error.status(404);
+	let error = new Error('Course-API Route Not Found.');
+	error.status = 404;
 	next(error);
 });
 
