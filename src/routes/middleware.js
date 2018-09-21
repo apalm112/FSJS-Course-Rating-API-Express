@@ -1,37 +1,26 @@
 'use strict';
 
-/* My Custon Middleware for Project 11 to check for Header Authentiation **************/
-const auth = require('basic-auth');
+/* Custom middleware for Project 11 to check for Header Authentiation **************/
 var User = require('../database/models').User;
+const auth = require('basic-auth');
 
 function credentials(req, res, next) {
 	// TODO: potential fix, password Authorization is not working on 'get /users' route.
-	var getAuthorization = auth(req);
-	console.log(getAuthorization);
-	if (getAuthorization.name && getAuthorization.pass) {
-		User.authenticate(getAuthorization.name, getAuthorization.pass, function(error, user) {
-			// console.log('line 42', user);
+	var getAuth = auth(req);
+	console.log(getAuth);
+	if (getAuth.name && getAuth.pass) {
+		User.authenticate(getAuth.name, getAuth.pass, function(error, user) {
 			if ( !user ) {
 				return next(error);
-			} else if ( error ) {
-				var error = new Error('Wrong email or password from custom middleware!');
-				error.status = 401;
-				return next(error)
 			} else {
-				// console.log('line 48', user); 
-				// req.session.userId = user._id;
-				// Redirects to the Users profile.
-				// res.redirect('/api/users/' + user._id );
-				// console.log(user);
 				res.locals.user = user.id;
 				req.body.user = user;
-				console.log(req.body.user);
-				next();
+				next(user);
 			}
 		});
 	} else {
-		// console.log(getAuthorization, getAuthorization.pass);
-		var error = new Error('Email and password are required from custom middleware.');
+		// If either email or password field is left blank, this error message is shown.
+		var error = new Error('You must enter Email and password. From custom middleware.');
 		error.status = 401;
 		return next(error);
 	}

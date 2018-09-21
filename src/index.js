@@ -25,28 +25,42 @@ app.use(express.urlencoded({ extended: false }));
 
 database.on('error', (error) => {
 	// set terminal stdout color red for error message
-	console.log('\x1b[31m%s\x1b[0m', '-----------------Error Connecting to Database------------------------');
+	console.log('\x1b[31m%s\x1b[0m', '-----------------Error Connecting to Database. Connection Failed------------------------');
 	console.error('\x1b[31m%s\x1b[0m', (error.message.slice(0, 81) + ']'));
 });
 
 database.once('open', () => {
-	console.log('\x1b[32m%s\x1b[0m', '-----------------Database Connection Successful------------------------');
+	console.log('\x1b[32m%s\x1b[0m', '-----------------Database Connection Successfully Opened------------------------');
 });
 
 // Binds the routes to app object, mounts the routes to the express app specifiying '/api' as the path.
 app.use('/api', routes);
 
-
-// send a friendly greeting for the root route
+// send a friendly greeting for the root route, acts as a placeholder for the browser in this project. Otherwise the express global error handler will be triggered when the path is set to '/'
 app.get('/', (req, res) => {
+<<<<<<< Updated upstream
 	res.json({
 		message: 'Welcome to the Course-API, such wow.'
 	});
+=======
+       res.json({
+               message: 'Welcome to the Course Review API, such wow.'
+       });
+>>>>>>> Stashed changes
 });
+
+
+
+
+
 
 // Catches requests that fall through w/out triggering any route handlers, send 404 if no other route matched
 app.use((req, res, next) => {
+<<<<<<< Updated upstream
 	let error = new Error('Course-API Route Not Found.');
+=======
+	let error = new Error('Something went horribly wrong.  API Route Not Found.');
+>>>>>>> Stashed changes
 	error.status = 404;
 	next(error);
 });

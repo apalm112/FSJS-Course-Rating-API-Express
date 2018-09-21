@@ -17,7 +17,8 @@ const validator = function(val){
 	}
 };
 
-//	DONE: emailAddress (String, required, must be unique and in correct format)
+//	TODO:  install mongoose-unique-validator to cover duplicate user entries.
+//	 emailAddress (String, required, must be unique and in correct format)
 var UserSchema = new Schema({
 	// _id: { type: mongoose.Schema.Types.ObjectId, required: true, auto: true },
 	fullName: 		 { type: String, required: true, trim: true },
@@ -28,7 +29,7 @@ var UserSchema = new Schema({
 var ReviewSchema = new Schema({
 	user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },	// Reference to User Document.
 	postedOn: { type: Date, default: Date.now  },
-	rating: { type: Number, min: 1, max: 55 },
+	rating: { type: Number, min: 1, max: 5 },
 	review: String
 });
 
@@ -48,15 +49,12 @@ var CourseSchema = new Schema({
 	//	reviews: [ { review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review' } } ]
 });
 
-// DONE: An "authenticate" static method on the user schema:
-// 	-- which compares a password to the hashed password stored on a user document instance.
+// DONE: An "authenticate" static method on the user schema: -- which compares a password to the hashed password stored on a user document instance.
 UserSchema.statics.authenticate = function(email, password, callback) {
 	User.findOne({ emailAddress: email })
 		.exec(function(error, user) {
-			if(error) {
-				return callback(error);
-			} else if ( !user ) {
-				var error = new Error('User/Email address Not Found.');
+			if ( !user ) {
+				error = new Error('Invalid Email address entered.');
 				error.status = 401;
 				return callback(error);
 			} else {
@@ -66,7 +64,7 @@ UserSchema.statics.authenticate = function(email, password, callback) {
 						return callback(null, user);
 					} else {
 						console.log('pasword hash NO match');
-						var error = new Error('Password is Not a match.');
+						error = new Error('Invalid password entered.');
 						error.status = 401;
 						return callback(error);
 					}
@@ -76,9 +74,7 @@ UserSchema.statics.authenticate = function(email, password, callback) {
 };
 
 
-// DONE: Create a pre save hook on the user schema that uses the bcrypt npm package to hash the user's password.
-// A pre save hook on the user schema encrypts the password property before saving it to the database
-/* Mongoose Pre-Hook:   is a type of middleware. */
+/* Mongoose Pre-Hook:   is a type of middleware.  A pre save hook on the user schema that uses the bcrypt npm package encrypts the password property before saving it to the database */
 UserSchema.pre('save', function(next) {
 		/*
 				Due to the nature of this in an arrow function you can't use them for Mongoose hooks. this in arrow functions aren't rebindable, but Mongoose wants to rebind this to be the document being saved. You should use an anonymous function instead (i.e., function() {})
