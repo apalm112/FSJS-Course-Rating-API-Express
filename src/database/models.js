@@ -6,7 +6,7 @@ var bcrypt = require('bcrypt');
 
 const validator = function(val){
 	// Checks email for correct format, regex sauce:  https://stackoverflow.com/questions/18022365/mongoose-validate-email-syntax
-	console.log(val);
+	// console.log('email validator', val);
 	// From Treehouse Link, Sauce:  http://emailregex.com/
 	//   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 	var checkEmail = val.match((/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/));
@@ -62,10 +62,10 @@ UserSchema.statics.authenticate = function(email, password, callback) {
 			} else {
 				bcrypt.compare(password, user.password, function(error, result) {
 					if (result === true) {
-						console.log('password hash matched');
+						// console.log('password hash matched');
 						return callback(null, user);
 					} else {
-						console.log('pasword hash NO match');
+						// console.log('pasword hash NO match');
 						var error = new Error('Invalid password entered.');
 						error.status = 401;
 						return callback(error);
@@ -97,26 +97,23 @@ UserSchema.pre('save', function(next) {
 });
 
 // Validation to prevent a user from reviewing their own course.  Which gets run when a new review is about to be inserted into the Review Collection. The `router.params` route gets the courseId, pass that into a method call to here, process it & then send it back.
-ReviewSchema.method('validateReview', function(var1, var3, callback) {
+ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	var review = this;
 	var userIDObject = var1;
 	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);
-	var actualCourseUserId = userIdString;
-	// console.log('actualCourseUserId and typeof:', actualCourseUserId, (typeof actualCourseUserId));// is an Object!
-	// Its getting Double quotes around it in the Node Debugger!
-	// get the :courseId from req.params & store it in a variable.
-	// var courseBeingPostedToId = var2;
-	// get the usersId from the req.body
-	var reviewBeingPostedByUserId = var3;
-	// console.log('reviewBeingPostedByUserId and typeof:', reviewBeingPostedByUserId, (typeof reviewBeingPostedByUserId));
-		console.log(( actualCourseUserId === reviewBeingPostedByUserId ));
+	var courseUserId = userIdString;
+	console.log('courseUserId and typeof:', courseUserId, (typeof courseUserId));// is an Object!
+	var postReviewUserId = var2;
+	console.log('postReviewUserId and typeof:', postReviewUserId, (typeof postReviewUserId));
+	console.log('courseUserId', courseUserId, 'postReviewUserId', postReviewUserId);
+		console.log('line 113', ( courseUserId === postReviewUserId ));
 		// This calls next() if the user is not posting a review to their own course.
-	if ( (actualCourseUserId === reviewBeingPostedByUserId) ) {
-		callback();
-	} else {
+	if ( (courseUserId === postReviewUserId) ) {
 		var error = new Error('User not allowed to post review on your own course.');
 		error.status = 401;
 		callback(error);
+	} else {
+		callback();
 	}
 });
 

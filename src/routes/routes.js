@@ -122,7 +122,7 @@ router.post('/courses', mid.credentials, (req, res, next) => {
 // DONE: Updates a course and returns no content PUT individual Course by _id.
 router.put('/courses/:coursesId', mid.credentials, (req, res, next) => {
 	// Course.findById(req.params.id)
-console.log(req.course);
+// console.log(req.course);
 // Deprecation Warning: Use updateOne() instead.
 	req.course.update(req.body, function(error, courses) {
 		if(error) return next(error);
@@ -139,7 +139,7 @@ router.param('reviews', (req, res, next, id) => {
 	// First capture the userId in the new review from inside the req.body object.
 	var ufo = req.body.user;
 	// console.log('====ufo=====typeof============>', ufo, (typeof ufo) );
-	console.log(objectID.isValid(ufo));
+	console.log('objectID is Valid:', objectID.isValid(ufo));
 	if ( !objectID.isValid(ufo) ) {
 		var error = new Error('USER ID is a Invalid Format!! router.param(reviews) line 144 ');
 		error.status = 404;
@@ -156,27 +156,28 @@ router.post('/courses/:coursesId/:reviews', mid.credentials, (req, res, next) =>
 	// DONE: ONE: Fix this static method call so it can work for the Review Model instead of the Course Model.
 
 	var userIDObject = req.course.user;
-	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);
+	var userIdString = (JSON.stringify(userIDObject)).slice(8, 32);
 	var courseUserId = userIdString;
 	var courseBeingPostedToId = req.course.id;
-	var reviewBeingPostedByUserId = req.body.user;
+	var postReviewUserId = req.body.user.id;
 	let potato = req.body.user;
+	console.log('==========================', courseUserId);
+	console.log('courseUserId', courseUserId, 'courseBeingPostedToId', courseBeingPostedToId, 'postReviewUserId', postReviewUserId);
 
 	var review = new Review(req.body);
 
-	review.validateReview(courseUserId, reviewBeingPostedByUserId, function(error) {
+	review.validateReview(courseUserId, postReviewUserId, function(error) {
 		if(error) {
 			return next(error);
 		} else {
 			// Sauce:  https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
-			req.course.reviews.push(reviewBeingPostedByUserId);
+			req.course.reviews.push(postReviewUserId);
 			req.course.save(req.course);
 			review.save(function(error, reviews) {
 				if(error) return next(error);
 				res.redirect('/api/courses/' + courseBeingPostedToId);
 				res.status(201);
 			});
-			
 		}
 	});
 });

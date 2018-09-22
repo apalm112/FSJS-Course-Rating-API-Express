@@ -7,7 +7,7 @@ var User = require('../database/models').User;
 function credentials(req, res, next) {
 	// TODO: potential fix, password Authorization is not working on 'get /users' route.
 	var getAuth = auth(req);
-	console.log(getAuth);
+	// console.log(getAuth);
 	if (getAuth.name && getAuth.pass) {
 		User.authenticate(getAuth.name, getAuth.pass, function(error, user) {
 			if ( !user ) {
