@@ -18,7 +18,7 @@ const mid = require('./middleware');
 // TODO:  Returns the currently authenticated user, ?UNIT TESTS?
 router.get('/users', mid.credentials, (req, res, next) => {
 	// When a User makes a request to the `GET /api/users` route with the correct credentials, the corresponding user document is returned.
-	console.log(req.body.user);
+	// console.log(req.body.user);
 	var user = req.body.user;
 	if (!user) {
 		res.status(401).json({
@@ -41,9 +41,8 @@ router.get('/users', mid.credentials, (req, res, next) => {
 // POST new individual user.  This works IF the data passed in is in this format:
 /*  {
 			 "fullName": "Bob Jones",
-			 "emailAddress": "bobjr@aol.com",
-			 "password": "password",
-			 "__v": 0
+			 "emailAddress": "bob@aol.com",
+			 "password": "pass"
 }
  It Must have the '"__v": 0' in order to Work Correctly!		*/
 // DONE: Creates a user, sets the Location header to "/", and returns no content!
@@ -68,6 +67,7 @@ router.param('coursesId',(req, res, next, id) => {
 		return next(error);
 	} else {
 // IDEA: Avoid exporting/requiring models — if any have refs to other models this can lead to a dependency nightmare. Use var User = mongoose.model('user') instead of require.  Sauce: https://stackoverflow.com/a/19051909/6495470
+		// TODO: See https://stackoverflow.com/a/52043244/6495470 for possible population solution.
 		Course
 			.findById(id)
 			.populate( 'user', 'fullName' )
@@ -80,6 +80,7 @@ router.param('coursesId',(req, res, next, id) => {
 					error.status = 404;
 					return next(error);
 				}
+				console.log(course);
 				req.course = course;
 				return next();
 			});	// end findById()
@@ -139,7 +140,7 @@ router.param('reviews', (req, res, next, id) => {
 	// First capture the userId in the new review from inside the req.body object.
 	var ufo = req.body.user;
 	// console.log('====ufo=====typeof============>', ufo, (typeof ufo) );
-	console.log('objectID is Valid:', objectID.isValid(ufo));
+	// console.log('objectID is Valid:', objectID.isValid(ufo));
 	if ( !objectID.isValid(ufo) ) {
 		var error = new Error('USER ID is a Invalid Format!! router.param(reviews) line 144 ');
 		error.status = 404;
@@ -161,8 +162,8 @@ router.post('/courses/:coursesId/:reviews', mid.credentials, (req, res, next) =>
 	var courseBeingPostedToId = req.course.id;
 	var postReviewUserId = req.body.user.id;
 	let potato = req.body.user;
-	console.log('==========================', courseUserId);
-	console.log('courseUserId', courseUserId, 'courseBeingPostedToId', courseBeingPostedToId, 'postReviewUserId', postReviewUserId);
+	// console.log('==========================', courseUserId);
+	// console.log('courseUserId', courseUserId, 'courseBeingPostedToId', courseBeingPostedToId, 'postReviewUserId', postReviewUserId);
 
 	var review = new Review(req.body);
 

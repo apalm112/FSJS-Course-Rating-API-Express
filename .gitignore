@@ -12,3 +12,5 @@ npm-debug.log*
 
 # mockup database to use w/ Postman
 CourseAPI.postman_collection.json
+
+unit_test_you_tube.md

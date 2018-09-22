@@ -44,7 +44,7 @@ var CourseSchema = new Schema({
 		title: { type: String, required: true },
 		description: { type: String, required: true }
 	}],
-	reviews: [ { type: mongoose.Schema.Types.ObjectId, ref: 'Review' } ]
+	reviews: { type: [mongoose.Schema.Types.ObjectId], ref: 'Review' }
 	//[ ObjectID1('AAAA'), ObjectID2('AAAA2') ]		// Reference to Review Documents.
 	//	reviews: [ { review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review' } } ]
 });
@@ -100,12 +100,13 @@ UserSchema.pre('save', function(next) {
 ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	var review = this;
 	var userIDObject = var1;
+	// TODO: Possibly change from `slice()` to `findChar()` to look for the "".  This way it gets the actual Number.
 	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);
 	var courseUserId = userIdString;
-	console.log('courseUserId and typeof:', courseUserId, (typeof courseUserId));// is an Object!
+	// console.log('courseUserId and typeof:', courseUserId, (typeof courseUserId));// is an Object!
 	var postReviewUserId = var2;
-	console.log('postReviewUserId and typeof:', postReviewUserId, (typeof postReviewUserId));
-	console.log('courseUserId', courseUserId, 'postReviewUserId', postReviewUserId);
+	// console.log('postReviewUserId and typeof:', postReviewUserId, (typeof postReviewUserId));
+	// console.log('courseUserId', courseUserId, 'postReviewUserId', postReviewUserId);
 		console.log('line 113', ( courseUserId === postReviewUserId ));
 		// This calls next() if the user is not posting a review to their own course.
 	if ( (courseUserId === postReviewUserId) ) {
