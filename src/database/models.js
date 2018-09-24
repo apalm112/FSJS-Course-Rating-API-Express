@@ -50,8 +50,8 @@ var CourseSchema = new Schema({
 });
 
 // DONE: An "authenticate" static method on the user schema: -- which compares a password to the hashed password stored on a user document instance.
-UserSchema.statics.authenticate = function(email, password, callback) {
-	User.findOne({ emailAddress: email })
+UserSchema.statics.authenticate = function(creds, callback) {
+	User.findOne({ emailAddress: creds.name })
 		.exec(function(error, user) {
 			if(error) {
 				return callback(error);
@@ -60,12 +60,10 @@ UserSchema.statics.authenticate = function(email, password, callback) {
 				error.status = 401;
 				return callback(error);
 			} else {
-				bcrypt.compare(password, user.password, function(error, result) {
+				bcrypt.compare(creds.pass, user.password, function(error, result) {
 					if (result === true) {
-						// console.log('password hash matched');
 						return callback(null, user);
 					} else {
-						// console.log('pasword hash NO match');
 						var error = new Error('Invalid password entered.');
 						error.status = 401;
 						return callback(error);
