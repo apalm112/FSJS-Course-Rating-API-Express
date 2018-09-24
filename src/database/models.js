@@ -1,8 +1,9 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var bcrypt = require('bcrypt');
+var mongoose = require('mongoose'),
+	Schema = mongoose.Schema,
+	uniqueValidator = require('mongoose-unique-validator'),
+	bcrypt = require('bcrypt');
 
 const validator = function(val){
 	// Checks email for correct format, regex sauce:  https://stackoverflow.com/questions/18022365/mongoose-validate-email-syntax
@@ -21,10 +22,11 @@ const validator = function(val){
 //	 emailAddress (String, required, must be unique and in correct format)
 var UserSchema = new Schema({
 	// _id: { type: mongoose.Schema.Types.ObjectId, required: true, auto: true },
-	fullName: 		 { type: String, required: true, trim: true },
-	emailAddress: { type: String,  required: true,  validate: validator },
+	fullName: 		 { type: String, required: true, unique: true, trim: true },
+	emailAddress: { type: String,  required: true, validate: validator, unique: true },
 	password:		 { type: String, required: true }
 });
+UserSchema.plugin(uniqueValidator);
 
 var ReviewSchema = new Schema({
 	user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },	// Reference to User Document.
