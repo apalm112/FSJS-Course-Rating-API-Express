@@ -12,11 +12,11 @@ const Course = require('../database/models').Course;
 const Review = require('../database/models').Review;
 
 // require custom middleware function
-const mid = require('./middleware');
+const middle = require('./middleware');
 
 /* User Routes *******************************************************/
 // TODO:  Returns the currently authenticated user, ?UNIT TESTS?
-router.get('/users', mid.credentials, (req, res, next) => {
+router.get('/users', middle.credentials, (req, res, next) => {
 	// When a User makes a request to the `GET /api/users` route with the correct credentials, the corresponding user document is returned.
 	// console.log(req.body.user);
 	var user = req.body.user;
@@ -110,7 +110,7 @@ router.get('/courses/:coursesId', (req, res) => {
 });
 
 // DONE: POST new individual Course. Creates a course, sets the Location header, and returns no content
-router.post('/courses', mid.credentials, (req, res, next) => {
+router.post('/courses', middle.credentials, (req, res, next) => {
 	// console.log(req.body);
 	var course = new Course(req.body);
 	course.save(function(error, course) {
@@ -121,7 +121,7 @@ router.post('/courses', mid.credentials, (req, res, next) => {
 });
 
 // DONE: Updates a course and returns no content PUT individual Course by _id.
-router.put('/courses/:coursesId', mid.credentials, (req, res, next) => {
+router.put('/courses/:coursesId', middle.credentials, (req, res, next) => {
 	// Course.findById(req.params.id)
 // console.log(req.course);
 // Deprecation Warning: Use updateOne() instead.
@@ -152,7 +152,7 @@ router.param('reviews', (req, res, next, id) => {
 
 // POST new individual Review. DONE: Creates a review for the specified course ID, sets the Location header to the related course, and returns no content.
 // // TODO: TWO: A User can use a correct pair of email & password to POST a new Review WHILE using a different user: ObjectId than the one that matches to the given email/password combo.
-router.post('/courses/:coursesId/:reviews', mid.credentials, (req, res, next) => {
+router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next) => {
 	// Put the userId into a variable in order to pass it into the static methon on the Course Model.
 	// DONE: ONE: Fix this static method call so it can work for the Review Model instead of the Course Model.
 

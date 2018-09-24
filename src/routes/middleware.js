@@ -1,20 +1,23 @@
 'use strict';
 
-/* Custom middleware for Project 11 to check for Header Authentiation **************/
+/* My Custon Middleware for Project 11 to check for Header Authentiation **************/
 const auth = require('basic-auth');
 var User = require('../database/models').User;
 
 function credentials(req, res, next) {
-	// TODO: potential fix, password Authorization is not working on 'get /users' route.
-	var getAuth = auth(req);
-	// console.log(getAuth);
-	if (getAuth.name && getAuth.pass) {
-		User.authenticate(getAuth.name, getAuth.pass, function(error, user) {
+	var getAuthorization = auth(req);
+// Conditional to get unit test for 401 error to pass.
+	// if(getAuthorization === undefined){
+	// 	res.status(401);
+	// 	return next(error);
+	// }
+	if (!getAuthorization.name || !getAuthorization.pass) {
+		var error = new Error('Email and password are required from custom middleware.');
+		error.status = 401;
+		return next(error);
+	} else {
+		User.authenticate(getAuthorization, function(error, user) {
 			if ( !user ) {
-				return next(error);
-			} else if (error) {
-				var error = new Error('Error message from custom middleware, figure it out...');
-				error.status = 401;
 				return next(error);
 			} else {
 				res.locals.user = user.id;
@@ -22,11 +25,6 @@ function credentials(req, res, next) {
 				next();
 			}
 		});
-	} else {
-		// If either email or password field is left blank, this error message is shown.
-		var error = new Error('You must enter Email and password. From custom middleware.');
-		error.status = 401;
-		return next(error);
 	}
 }
 
