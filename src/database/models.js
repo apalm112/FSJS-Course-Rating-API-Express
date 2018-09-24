@@ -7,10 +7,9 @@ var mongoose = require('mongoose'),
 
 const validator = function(val){
 	// Checks email for correct format, regex sauce:  https://stackoverflow.com/questions/18022365/mongoose-validate-email-syntax
-	// console.log('email validator', val);
+	//				val.match((/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/));
 	// From Treehouse Link, Sauce:  http://emailregex.com/
-	//   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-	var checkEmail = val.match((/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/));
+	var checkEmail = val.match( (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) );
 	if (checkEmail !== null) {
 		return true;
 	} else if (!checkEmail) {
