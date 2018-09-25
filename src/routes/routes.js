@@ -8,8 +8,8 @@ const auth = require('basic-auth');
 
 // require database models
 const User = require('../database/models').User;
-const Course = require('../database/models').Course;
 const Review = require('../database/models').Review;
+const Course = require('../database/models').Course;
 
 // require custom middleware function
 const middle = require('./middleware');
@@ -55,7 +55,6 @@ router.post('/users', (req, res, next) => {
 	});
 });
 
-
 /* Courses Routes *******************************************************/
 router.param('coursesId',(req, res, next, id) => {
 	// TODO: Fix the position of the reviews array in the return format.  It is listed above the course data, which is incorrect.
@@ -71,9 +70,9 @@ router.param('coursesId',(req, res, next, id) => {
 		Course
 			.findById(id)
 			.populate( 'user', 'fullName' )
-			.populate({ path: 'user', populate: { path: 'user', model: 'User', select: 'fullName' }})
+			.populate({ path: 'reviews', populate: { path: 'user', select: 'fullName' }})
+			// .populate({ path: 'reviews', model: 'Course', select: 'fullName' })
 			// .execPopulate()
-			// .populate('reviews')
 			.exec(function(error, course) {
 				if(error) return next(error);
 				if(!course) {

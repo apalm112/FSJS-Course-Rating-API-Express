@@ -116,10 +116,16 @@ ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	}
 });
 
-var User = mongoose.model('User', UserSchema);
-var Review = mongoose.model('Review', ReviewSchema);
-var Course = mongoose.model('Course', CourseSchema);
+// var User = mongoose.model('User', UserSchema);
+// var Review = mongoose.model('Review', ReviewSchema);
+// var Course = mongoose.model('Course', CourseSchema);
+//
+// module.exports.User = User;
+// module.exports.Review = Review;
+// module.exports.Course = Course;
 
-module.exports.User = User;
-module.exports.Review = Review;
-module.exports.Course = Course;
+module.exports = {
+	User: mongoose.model('User', UserSchema),
+	Review: mongoose.model('Review', ReviewSchema),
+	Course: mongoose.model('Course', CourseSchema)
+};
