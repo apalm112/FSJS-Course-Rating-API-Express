@@ -1,8 +1,8 @@
 'use strict';
 
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var bcrypt = require('bcrypt');
+var mongoose = require('mongoose'),
+	Schema = mongoose.Schema,
+	bcrypt = require('bcrypt');
 
 const validator = function(val){
 	// Checks email for correct format, regex sauce:  https://stackoverflow.com/questions/18022365/mongoose-validate-email-syntax
@@ -44,9 +44,9 @@ var CourseSchema = new Schema({
 		title: { type: String, required: true },
 		description: { type: String, required: true }
 	}],
-	reviews: { type: [mongoose.Schema.Types.ObjectId], ref: 'Review' }
+	// reviews: { type: [mongoose.Schema.Types.ObjectId], ref: 'Review' }
+	reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
 	//[ ObjectID1('AAAA'), ObjectID2('AAAA2') ]		// Reference to Review Documents.
-	//	reviews: [ { review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review' } } ]
 });
 
 // DONE: An "authenticate" static method on the user schema: -- which compares a password to the hashed password stored on a user document instance.

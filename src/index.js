@@ -15,6 +15,7 @@ app.set('port', process.env.PORT || 5000);
 app.use(logger('dev'));
 
 mongoose.connect('mongodb://localhost:27017/api', { useNewUrlParser: true });
+mongoose.set('debug', true);
 // Create a variable to hold the database connection object.
 const database = mongoose.connection;
 

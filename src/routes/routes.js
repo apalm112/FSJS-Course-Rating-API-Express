@@ -71,16 +71,16 @@ router.param('coursesId',(req, res, next, id) => {
 		Course
 			.findById(id)
 			.populate( 'user', 'fullName' )
-			.populate({ path: 'reviews', populate: { path: 'user', select: 'fullName' }})
+			.populate({ path: 'user', populate: { path: 'user', model: 'User', select: 'fullName' }})
+			// .execPopulate()
+			// .populate('reviews')
 			.exec(function(error, course) {
-			// console.log(course.reviews, course.user);
 				if(error) return next(error);
 				if(!course) {
 					var error = new Error('api Course ID Not Found!');
 					error.status = 404;
 					return next(error);
 				}
-				console.log(course);
 				req.course = course;
 				return next();
 			});	// end findById()
@@ -171,6 +171,7 @@ router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next)
 		if(error) {
 			return next(error);
 		} else {
+			// TODO: Could be bug w/ the way the two documents are being updated & saved.  Since the population doesn't work at all for newly posted reviews or courses.
 			// Sauce:  https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
 			req.course.reviews.push(postReviewUserId);
 			req.course.save(req.course);
