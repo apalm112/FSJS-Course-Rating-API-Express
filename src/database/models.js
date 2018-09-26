@@ -17,10 +17,7 @@ const validator = function(val){
 	}
 };
 
-//	TODO:  install mongoose-unique-validator to cover duplicate user entries.
-//	 emailAddress (String, required, must be unique and in correct format)
 var UserSchema = new Schema({
-	// _id: { type: mongoose.Schema.Types.ObjectId, required: true, auto: true },
 	fullName: 		 { type: String, required: true, unique: true, trim: true },
 	emailAddress: { type: String,  required: true, validate: validator, unique: true },
 	password:		 { type: String, required: true }
@@ -32,6 +29,13 @@ var ReviewSchema = new Schema({
 	postedOn: { type: Date, default: Date.now  },
 	rating: { type: Number, min: 1, max: 5 },
 	review: String
+});
+ReviewSchema.virtual('space', {
+	reviews: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+	ref: 'Course',
+	localField: 'user',
+	foreignField: 'user',
+	justOne: false
 });
 
 var CourseSchema = new Schema({
@@ -45,9 +49,8 @@ var CourseSchema = new Schema({
 		title: { type: String, required: true },
 		description: { type: String, required: true }
 	}],
-	reviews: { type: [mongoose.Schema.Types.ObjectId], ref: 'Review' }
+	reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
 	//[ ObjectID1('AAAA'), ObjectID2('AAAA2') ]		// Reference to Review Documents.
-	//	reviews: [ { review: { type: mongoose.Schema.Types.ObjectId, ref: 'Review' } } ]
 });
 
 // DONE: An "authenticate" static method on the user schema: -- which compares a password to the hashed password stored on a user document instance.
@@ -102,12 +105,8 @@ ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	// TODO: Possibly change from `slice()` to `findChar()` to look for the "".  This way it gets the actual Number.
 	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);
 	var courseUserId = userIdString;
-	// console.log('courseUserId and typeof:', courseUserId, (typeof courseUserId));// is an Object!
 	var postReviewUserId = var2;
-	// console.log('postReviewUserId and typeof:', postReviewUserId, (typeof postReviewUserId));
-	// console.log('courseUserId', courseUserId, 'postReviewUserId', postReviewUserId);
-		console.log('line 113', ( courseUserId === postReviewUserId ));
-		// This calls next() if the user is not posting a review to their own course.
+	// This calls next() if the user is not posting a review to their own course.
 	if ( (courseUserId === postReviewUserId) ) {
 		var error = new Error('User not allowed to post review on your own course.');
 		error.status = 401;
