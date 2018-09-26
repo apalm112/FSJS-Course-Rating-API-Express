@@ -16,6 +16,7 @@ app.use(logger('dev'));
 
 mongoose.connect('mongodb://localhost:27017/api', { useNewUrlParser: true });
 // mongoose.set('debug', true);  //<--runs debugger in terminal
+
 // Create a variable to hold the database connection object.
 const database = mongoose.connection;
 
