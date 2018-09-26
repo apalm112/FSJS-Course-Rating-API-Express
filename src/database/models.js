@@ -30,6 +30,7 @@ var ReviewSchema = new Schema({
 	review: String
 });
 ReviewSchema.virtual('space', {
+	reviews: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
 	ref: 'Course',
 	localField: 'user',
 	foreignField: 'user',
@@ -37,7 +38,6 @@ ReviewSchema.virtual('space', {
 });
 
 var CourseSchema = new Schema({
-	reviews: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
 	user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },		// ObjectID1('AAAA') Reference to User Document.
 	title:  { type: String, required: true },
 	description: { type: String, required: true },
