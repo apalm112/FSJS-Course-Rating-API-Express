@@ -36,6 +36,7 @@ router.post('/users', (req, res, next) => {
 
 /* Courses Routes *******************************************************/
 router.param('coursesId',(req, res, next, id) => {
+	// Checks the URI courseId format, finds the course document, populates the refs in it & returns it.
 	// Param route uses mongodb navtive method to validate the ObjectId, sauce: https://stackoverflow.com/questions/11985228/mongodb-node-check-if-objectid-is-valid
 	if ( !objectID.isValid(id) ) {
 		var error = new Error('Course ID is a Invalid Format!!');
@@ -98,8 +99,6 @@ router.param('reviews', (req, res, next, id) => {
 	// This param route validates the incoming user _id.  Invalid ones get an error message, while valide ones are allowed to continue onto the next middleware.  Param route uses mongodb navtive method to validate the ObjectId, sauce: https://stackoverflow.com/questions/11985228/mongodb-node-check-if-objectid-is-valid
 	// First capture the userId in the new review from inside the req.body object.
 	var getId = req.body.user;
-	// console.log('====getId=====typeof============>', getId, (typeof getId) );
-	// console.log('objectID is Valid:', objectID.isValid(getId));
 	/* Must be in format:
 	 										{
 											    "user": "5ba97554b7116463fd924849",
@@ -117,9 +116,7 @@ router.param('reviews', (req, res, next, id) => {
 
 router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next) => {
 	// Put the userId into a variable in order to pass it into the static methon on the Course Model.
-	var userIDObject = req.course.user;
-	var userIdString = (JSON.stringify(userIDObject)).slice(8, 32);
-	var courseUserId = userIdString;
+	var courseUserId = (JSON.stringify(req.course.user)).slice(8, 32);
 	var courseBeingPostedToId = req.course.id;
 	var postReviewUserId = req.body.user.id;
 	var review = new Review(req.body);
@@ -128,17 +125,15 @@ router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next)
 		if(error) {
 			return next(error);
 		} else {
-			// TODO: Could be bug w/ the way the two documents are being updated & saved.  Since the population doesn't work at all for newly posted reviews or courses.
-			// Sauce:  https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
-			review.save(function(error, reviews) {
+			req.course.reviews.push(postReviewUserId);
+			req.course.save(req.course);
+			review.save(function(error) {
 				if(error) return next(error);
 				res.redirect('/api/courses/' + courseBeingPostedToId);
 				res.status(201);
 			});
-			req.course.reviews.push(postReviewUserId);
-			req.course.save(req.course);
 		}
 	});
 });
-/* End Routes *****************************************************/
+
 module.exports = router;

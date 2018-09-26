@@ -50,10 +50,9 @@ var CourseSchema = new Schema({
 		description: { type: String, required: true }
 	}],
 	reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
-	//[ ObjectID1('AAAA'), ObjectID2('AAAA2') ]		// Reference to Review Documents.
 });
 
-// DONE: An "authenticate" static method on the user schema: -- which compares a password to the hashed password stored on a user document instance.
+// An "authenticate" static method on the user schema: -- which compares a password to the hashed password stored on a user document instance.
 UserSchema.statics.authenticate = function(creds, callback) {
 	User.findOne({ emailAddress: creds.name })
 		.exec(function(error, user) {
@@ -78,14 +77,13 @@ UserSchema.statics.authenticate = function(creds, callback) {
 };
 
 
-/* Mongoose Pre-Hook:   is a type of middleware.  A pre save hook on the user schema that uses the bcrypt npm package encrypts the password property before saving it to the database */
+/* A pre save hook on the user schema that uses the bcrypt npm package encrypts the password property before saving it to the database */
 UserSchema.pre('save', function(next) {
 		/*
 				Due to the nature of this in an arrow function you can't use them for Mongoose hooks. this in arrow functions aren't rebindable, but Mongoose wants to rebind this to be the document being saved. You should use an anonymous function instead (i.e., function() {})
 				`.pre()` is Mongoose hook.
 				The data assigned to `this` in Mongoose's pre save hook function is the data that Mongoose will write to MongoDB.
 		 */
-	// Hash sauce:  https://github.com/kelektiv/node.bcrypt.js
 	const saltRounds = 10;
 	var user = this;
 	console.log(user);
