@@ -30,13 +30,6 @@ var ReviewSchema = new Schema({
 	rating: { type: Number, min: 1, max: 5 },
 	review: String
 });
-ReviewSchema.virtual('space', {
-	reviews: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-	ref: 'Course',
-	localField: 'user',
-	foreignField: 'user',
-	justOne: false
-});
 
 var CourseSchema = new Schema({
 	user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },		// ObjectID1('AAAA') Reference to User Document.
@@ -98,7 +91,6 @@ UserSchema.pre('save', function(next) {
 
 // Validation to prevent a user from reviewing their own course.  Which gets run when a new review is about to be inserted into the Review Collection. The `router.params` route gets the courseId, pass that into a method call to here, process it & then send it back.
 ReviewSchema.method('validateReview', function(var1, var2, callback) {
-	var review = this;
 	var userIDObject = var1;
 	// TODO: Possibly change from `slice()` to `findChar()` to look for the "".  This way it gets the actual Number.
 	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);
@@ -112,6 +104,11 @@ ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	} else {
 		callback();
 	}
+});
+
+CourseSchema.method('review', function (reviews, callback) {
+	Object.assign(this, reviews, { reviews: this.reviews });
+	this.save(callback);
 });
 
 var User = mongoose.model('User', UserSchema);

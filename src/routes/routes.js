@@ -96,15 +96,16 @@ router.put('/courses/:coursesId', middle.credentials, (req, res, next) => {
 });
 
 router.param('reviews', (req, res, next, id) => {
-	// This param route validates the incoming user _id.  Invalid ones get an error message, while valide ones are allowed to continue onto the next middleware.  Param route uses mongodb navtive method to validate the ObjectId, sauce: https://stackoverflow.com/questions/11985228/mongodb-node-check-if-objectid-is-valid
+	// This param route validates the incoming user _id.  Invalid ones get an error message, while valid ones are allowed to continue onto the next middleware.  Param route uses mongodb navtive method to validate the ObjectId, sauce: https://stackoverflow.com/questions/11985228/mongodb-node-check-if-objectid-is-valid
 	// First capture the userId in the new review from inside the req.body object.
 	var getId = req.body.user;
 	/* Must be in format:
-	 										{
-											    "user": "5ba97554b7116463fd924849",
-											    "rating": 4,
-											    "review": "Here is a new review."
-											}				*/
+		{
+	    "user": "5ba97554b7116463fd924849",
+	    "rating": 4,
+	    "review": "Here is a new review."
+		}
+	*/
 	if ( !objectID.isValid(getId) ) {
 		var error = new Error('USER ID is a Invalid Format!! router.param(reviews)');
 		error.status = 404;
@@ -124,15 +125,23 @@ router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next)
 	review.validateReview(courseUserId, postReviewUserId, function(error) {
 		if(error) {
 			return next(error);
-		} else {
-			req.course.reviews.push(postReviewUserId);
-			req.course.save(req.course);
-			review.save(function(error) {
-				if(error) return next(error);
-				res.redirect('/api/courses/' + courseBeingPostedToId);
-				res.status(201);
-			});
 		}
+
+	//  Save new review First
+		review.save();
+	//  Get that new reviews _id
+		var query = Review.where({ user: postReviewUserId });
+		query.findOne(function(error) {
+			if (error) return error;
+			if (review) review.id;
+		});
+	// Push new reviews _id into the course.review array
+		req.course.reviews.push( review.id );
+		req.course.save(req.course, function(error) {
+			if(error) return next(error);
+			res.redirect('/api/courses/' + courseBeingPostedToId);
+			res.status(201);
+		});
 	});
 });
 
