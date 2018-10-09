@@ -127,19 +127,15 @@ router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next)
 			return next(error);
 		}
 
-	// TODO: Fix the order of operations here from current to:
-			// req.course.reviews.push(postReviewUserId);
-			// req.course.save(req.course);
-			// review.save(function(error) {
-	//   * Save new review First
+	//  Save new review First
 		review.save();
-//   * Get that new reviews _id
+	//  Get that new reviews _id
 		var query = Review.where({ user: postReviewUserId });
 		query.findOne(function(error) {
 			if (error) return error;
 			if (review) review.id;
 		});
-			//   * Push new reviews _id into the course.review array
+	// Push new reviews _id into the course.review array
 		req.course.reviews.push( review.id );
 		req.course.save(req.course, function(error) {
 			if(error) return next(error);
