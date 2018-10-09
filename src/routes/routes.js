@@ -15,6 +15,8 @@ const middle = require('./middleware');
 /* User Routes *******************************************************/
 router.get('/users', middle.credentials, (req, res) => {
 	// When a User makes a request to the `GET /api/users` route with the correct credentials, the corresponding user document is returned.
+	// TODO: Slack channel sez All seed data passwords MUST be Hashed!
+	//  * So fix that I guess...
 	res.json(req.body.user);
 });
 

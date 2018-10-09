@@ -4,7 +4,7 @@
 const express = require('express');
 const app = express();
 
-const bodyParser = require('body-parser');
+const jsonParser = require('body-parser').json;
 const logger = require('morgan');
 const mongoose = require('mongoose');
 const routes = require('./routes/routes');
@@ -22,9 +22,9 @@ mongoose.connect('mongodb://localhost:27017/api', { useNewUrlParser: true });
 const database = mongoose.connection;
 
 // app object resisters middleware w/ use(), applies it to all routes.
-app.use(bodyParser.json());
+app.use(jsonParser.json());
 // jsonParser middleware parses request to make it accessible to req.body
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(jsonParser.urlencoded({ extended: false }));
 
 database.on('error', (error) => {
 	// set terminal stdout color red for error message
