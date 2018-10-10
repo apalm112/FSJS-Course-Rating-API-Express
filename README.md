@@ -32,7 +32,7 @@ $ mongoimport --db api --collection courses --type=json --jsonArray --file cours
 
 * To run the API locally, in a new terminal tab enter:
 
-	`$ npm start`
+	`$ npm start` or `nodemon`
 
 * Now you can use Postman to test the API routes, such as `GET localhost:5000/api/courses`.
 
