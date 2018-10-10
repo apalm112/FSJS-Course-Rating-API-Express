@@ -46,7 +46,7 @@ To POST a new user enter the data in this format:
 }
 ```
 
-POST a new review in this format:
+POST a new review in this format, where the `user` value is the users `_id`:
 
 ```json
 {
