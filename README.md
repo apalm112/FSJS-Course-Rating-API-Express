@@ -30,11 +30,11 @@ $ mongoimport --db api --collection reviews --type=json --jsonArray --file revie
 $ mongoimport --db api --collection courses --type=json --jsonArray --file courses.json
 ```
 
-* In a new terminal tab enter:
+* To run the API locally, in a new terminal tab enter:
 
 	`$ npm start`
 
-* Enter the routes in Postman to see results.
+* Now you can use Postman to test the API routes.
 
 To POST a new user enter the data in this format:
 
