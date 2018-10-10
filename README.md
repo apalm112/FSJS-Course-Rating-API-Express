@@ -16,7 +16,7 @@ A REST API using Express. The API will provide a way for users to review educati
 
 	`$ npm i`
 
-* In a terminal run:
+* Run:
 
 	`$ mongod`
 
@@ -34,7 +34,7 @@ $ mongoimport --db api --collection courses --type=json --jsonArray --file cours
 
 	`$ npm start`
 
-* Now you can use Postman to test the API routes.
+* Now you can use Postman to test the API routes, such as `GET localhost:5000/api/courses`.
 
 To POST a new user enter the data in this format:
 
