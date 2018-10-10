@@ -49,9 +49,9 @@ To POST a new user enter the data in this format:
 POST a new review in this format:
 
 ```json
-	{
-		"user": 	"5ba97554b7116463fd924849",
-		"rating":    4,
-		"review":   "Here is a new review, such wow."
-	}
-	```
+{
+	"user": 	"5ba97554b7116463fd924849",
+	"rating":    4,
+	"review":   "Here is a new review, such wow."
+}
+```
