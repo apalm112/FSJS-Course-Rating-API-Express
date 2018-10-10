@@ -6,9 +6,7 @@ var mongoose = require('mongoose'),
 	bcrypt = require('bcrypt');
 
 const validator = function(val){
-	// Checks email for correct format, regex sauce:  https://stackoverflow.com/questions/18022365/mongoose-validate-email-syntax
-	//				val.match((/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/));
-	// From Treehouse Link, Sauce:  http://emailregex.com/
+	// Check email to be a valid address.  From Treehouse Link, Sauce:  http://emailregex.com/
 	var checkEmail = val.match( (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/) );
 	if (checkEmail !== null) {
 		return true;
@@ -18,10 +16,11 @@ const validator = function(val){
 };
 
 var UserSchema = new Schema({
-	fullName: 		 { type: String, required: true, unique: true, trim: true },
+	fullName: 		 { type: String, required: true, trim: true },
 	emailAddress: { type: String,  required: true, validate: validator, unique: true },
 	password:		 { type: String, required: true }
 });
+// Checks that email address is unique.
 UserSchema.plugin(uniqueValidator);
 
 var ReviewSchema = new Schema({
@@ -32,7 +31,7 @@ var ReviewSchema = new Schema({
 });
 
 var CourseSchema = new Schema({
-	user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },		// ObjectID1('AAAA') Reference to User Document.
+	user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },		// Reference to User Document.
 	title:  { type: String, required: true },
 	description: { type: String, required: true },
 	estimatedTime: String,
@@ -79,7 +78,6 @@ UserSchema.pre('save', function(next) {
 		 */
 	const saltRounds = 10;
 	var user = this;
-	console.log(user);
 	// only hash the password if it has been modified or is new.
 	if (!user.isModified('password')) return next();
 	bcrypt.hash(user.password, saltRounds, function(error, hash) {
@@ -89,14 +87,13 @@ UserSchema.pre('save', function(next) {
 	});
 });
 
-// Validation to prevent a user from reviewing their own course.  Which gets run when a new review is about to be inserted into the Review Collection. The `router.params` route gets the courseId, pass that into a method call to here, process it & then send it back.
+// Validation to prevent a user from reviewing their own course.  Which gets run when a new review is about to be inserted into the Review Collection. The `router.params` route gets the courseId, passes that into a method call to here, processes it & then sends it back.
 ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	var userIDObject = var1;
-	// TODO: Possibly change from `slice()` to `findChar()` to look for the "".  This way it gets the actual Number.
 	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);
 	var courseUserId = userIdString;
 	var postReviewUserId = var2;
-	// This calls next() if the user is not posting a review to their own course.
+	// The callback calls next() if the user is not posting a review to their own course.
 	if ( (courseUserId === postReviewUserId) ) {
 		var error = new Error('User not allowed to post review on your own course.');
 		error.status = 401;
@@ -106,10 +103,6 @@ ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	}
 });
 
-CourseSchema.method('review', function (reviews, callback) {
-	Object.assign(this, reviews, { reviews: this.reviews });
-	this.save(callback);
-});
 
 var User = mongoose.model('User', UserSchema);
 var Review = mongoose.model('Review', ReviewSchema);

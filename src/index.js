@@ -39,28 +39,22 @@ database.once('open', () => {
 // Binds the routes to app object, mounts the routes to the express app specifiying '/api' as the path.
 app.use('/api', routes);
 
-// send a friendly greeting for the root route, acts as a placeholder for the browser in this project. Otherwise the express global error handler will be triggered when the path is set to '/'
+// Acts as a placeholder for the browser in this project. Otherwise the express global error handler will be triggered when the path is set to '/'
 app.get('/', (req, res) => {
-	res.json({
-		message: 'Welcome to the Course-API, such wow.'
-	});
+	res.json();
 });
 
 // Catches requests that fall through w/out triggering any route handlers, send 404 if no other route matched
 app.use((req, res, next) => {
-	let error = new Error('Something went horribly wrong.  API Route Not Found.');
+	let error = new Error('Something went wrong.  API Route Not Found.');
 	error.status = 404;
 	next(error);
 });
 
-// global error handler
-/* {
-    "error": {}
-}*/
+// global error handler { "error": {} }
 app.use((error, req, res, next) => {
 	res.status(error.status || 500)
-	.json({ error: { message: error.message}
-	});
+	.json({ error: { message: error.message} });
 });
 
 // start listening on our port
