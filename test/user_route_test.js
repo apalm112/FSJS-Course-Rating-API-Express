@@ -40,29 +40,20 @@ describe('GET /api/users Route Test Suite', function () {
 	/* End of code block */
 
 	describe('Invalid Credentials', function () {
-
 		describe('Test middleware.credentials:', function () {
 			before(function (done) {
 				req = httpMocks.createRequest({
-					method: 'GET',
-					url: '/api/users',
+					// method: 'GET',
+					// url: '/api/users',
 					headers : { Authorization: 'Basic Og==' }	// Email & Password left empty
-					// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Good Creds
+				// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Good Creds
 				}),
-				res = httpMocks.createResponse({
-					locals: {
-						anyKey: 'any Value here',
-						authenticated: false,
-						Authorization: 'Basic Og=='
-					}
-				});
+				res = httpMocks.createResponse({});
 				done();
 			});
 
 			it('should return 401 status error when passed no credentials', function (done) {
-				middleware.credentials(req, res, function next(error) {
-					if(error) {	res.statusCode = error.status; }
-				});
+				middleware.credentials(req, res, function next() {});
 				expect(res.statusCode).to.deep.equal(401);
 				done();
 			}); // End it('should return 401 when passed no credentials')

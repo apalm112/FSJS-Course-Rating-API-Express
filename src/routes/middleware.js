@@ -34,7 +34,8 @@ exports.credentials = function(req, res, next) {
 		return next();
 	} else {
 		var error = new Error('Email and password are required from custom middleware.');
-		error.status = 401;
+	// Set res.statusCode for unit testing.
+		error.status = res.statusCode = 401;
 		return next(error);
 	}
 };
