@@ -29,7 +29,7 @@ const User = require('../database/models').User;
 
 exports.credentials = function(req, res, next) {
 	var getAuthorization = auth(req);
-	// Get the user's email & password from the headers.
+	// Get the user's email, (name = email), & password from the headers.
 	if (getAuthorization.name && getAuthorization.pass) {
 		return next();
 	} else {
