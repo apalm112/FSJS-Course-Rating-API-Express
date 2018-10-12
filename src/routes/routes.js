@@ -14,9 +14,12 @@ const middle = require('./middleware');
 
 /* User Routes **********************************************************/
 // When a User makes a request to the `GET /api/users` route with the correct credentials, the corresponding user document is returned.
-router.get('/users', middle.credentials, (req, res) => {
+/*router.get('/users', middle.credentials, (req, res) => {
 	res.json(req.body.user);
-});
+});*/
+// TODO: Write Unit Test for GET /api/user route:
+router.get('/users', middle.credentials, middle.callAuthen, middle.result);
+
 
 // Creates a user, sets the Location header to "/", and returns no content.
 router.post('/users', (req, res, next) => {
