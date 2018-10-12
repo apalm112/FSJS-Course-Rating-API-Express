@@ -3,12 +3,10 @@
 # dependencies
 node_modules
 
-# testing
-/test
+package-lock.json
 
 npm-debug.log*
 
-.eslintrc.json
 
 # mockup database to use w/ Postman
 CourseAPI.postman_collection.json
