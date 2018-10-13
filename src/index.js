@@ -7,7 +7,7 @@ const app = express();
 // const bodyParser = require('body-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
-const routes = require('./routes/routes');
+const apiRoutes = require('./routes/routes');
 
 // set our port
 app.set('port', process.env.PORT || 5000);
@@ -36,9 +36,11 @@ database.once('open', () => {
 	console.log('\x1b[32m%s\x1b[0m', '-----------------Database Connection Successfully Opened------------------------');
 });
 
+/******************************************************************************/
 // Binds the routes to app object, mounts the routes to the express app specifiying '/api' as the path.
-app.use('/api', routes);
-
+// app.use('/api', apiRoutes);
+apiRoutes(app);	// For unit testing  sauce: evanshortiss.com
+/******************************************************************************/
 // Acts as a placeholder for the browser in this project. Otherwise the express global error handler will be triggered when the path is set to '/'
 app.get('/', (req, res) => {
 	res.json();

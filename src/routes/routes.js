@@ -12,13 +12,23 @@ const Course = require('../database/models').Course;
 // require custom middleware function
 const middle = require('./middleware');
 
+/******************************************************************************/
+// Changed for Unit Testing purposes.
+module.exports = function (app) {
+	// Mount routes to app
+	app.use('/api', router);
+/******************************************************************************/
+
+
 /* User Routes **********************************************************/
 // When a User makes a request to the `GET /api/users` route with the correct credentials, the corresponding user document is returned.
 /*router.get('/users', middle.credentials, (req, res) => {
 	res.json(req.body.user);
 });*/
 // TODO: Write Unit Test for GET /api/user route:
-router.get('/users', middle.credentials, middle.callAuthen, middle.result);
+router.get('/users', middle.credentials, middle.callAuthen, (req, res) =>{
+	res.json(req.body.user);
+});
 
 
 // Creates a user, sets the Location header to "/", and returns no content.
@@ -135,4 +145,4 @@ router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next)
 	});
 });
 
-module.exports = router;
+};	// module.exports = router;
