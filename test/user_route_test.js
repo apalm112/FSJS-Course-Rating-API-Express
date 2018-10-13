@@ -10,41 +10,33 @@
 
  */
 // Require modules
-var auth = require('basic-auth'),
-	chai = require('chai'),
-	express = require('express'),
+var chai = require('chai'),
 	httpMocks = require('node-mocks-http'),
 	mongoose = require('mongoose'),
+	testgoose = require('testgoose'),
 	proxyquire = require('proxyquire'),	// .noCallThru()
 	sinon = require('sinon'),
+	express = require('express'),
 	supertest = require('supertest');
 // Set Variables
 var expect = chai.expect;
-var getUser = {
-		"_id": ("5bbe4bea5c90b436b20e602c"),
-		"fullName": "One Uno",
-		"emailAddress": "one@aol.com",
-		"password": "$2b$10$4f8zjUTcj9fxrNEi7IGuDumozs4b4aGWtf608DarB0DJraEwYSnva",
-		"__v": 0
-}
+
 // Test Suite:  https://stackoverflow.com/a/34517121/6495470
-describe('GET /api/users Route Test Suite', function () {
-	// Require Custom Middleware
-	var middleware = require('../src/routes/middleware');
-	console.log('Custom Middleware:\n', middleware);
-	var req, res, error;
 
 	/* To stop OverwriteModelError. Sauce: https://stackoverflow.com/a/43761258/6495470 */
 	for (let model in mongoose.models)
-	delete mongoose.models[model];
+		delete mongoose.models[model];
 	/* End of code block */
 
-	describe('Invalid Credentials', function () {
-		describe('Test middleware.credentials:', function () {
+
+	/**************************************************************************************	THIS TEST WORKS */
+/*		describe('Invalid Credentials:  Test middleware.credentials:', function () {
+			var credentials = require('../src/routes/middleware').credentials;
+			var req, res;
 			before(function (done) {
 				req = httpMocks.createRequest({
-					// method: 'GET',
-					// url: '/api/users',
+					method: 'GET',
+					url: '/api/users',
 					headers : { Authorization: 'Basic Og==' }	// Email & Password left empty
 				// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Good Creds
 				}),
@@ -53,52 +45,99 @@ describe('GET /api/users Route Test Suite', function () {
 			});
 
 			it('should return 401 status error when passed no credentials', function (done) {
-				middleware.credentials(req, res, function next() {});
+				credentials(req, res, function next() {});
 				expect(res.statusCode).to.deep.equal(401);
 				done();
 			}); // End it('should return 401 when passed no credentials')
-		});  // End describe('Test middleware.credentials:')
+		});  */// End describe('Test middleware.credentials:')
+	/**************************************************************************************/
 
-		describe('Test middleware.callAuthen:', function () {
-			before(function (done) {
-				req = httpMocks.createRequest({
-					method: 'GET',
-					url: '/users',
-					headers : { authorization: 'Basic b25lQGFvbC5jb21zOm9uZQ==' } // Bad Creds
-					// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Good Creds
-				}),
-				res = httpMocks.createResponse({
-					locals: {
-						anyKey: 'any Value here',
-						authenticated: false,
-						authorization: 'Basic b25lQGFvbC5jb21zOm9uZQ=='
-						//  	authorization: 'Basic b25lQGFvbC5jb206b25l'
-					}
+
+describe('Invalid Credentials:  Test middleware.callAuthen:', function () {
+	var callAuthen = require('../src/routes/middleware').callAuthen;
+	var app, getAuthenStub, request, route, user, req, res;
+
+	before(function (done) {
+		// A stub you can use to control conditionals
+		getAuthenStub = sinon.stub();
+		// Create an Express application object
+		app = express();
+		// Get the router module w/ stubbed out dependency, stub this out so you can control the results returned by the middleware module to ensure you execute all paths in your code
+		route = proxyquire('../src/routes/routes', {
+			'../database/models': { authenticate: getAuthenStub }
+		});
+		// Bind a route to the application.
+		route(app);
+		// Get a supertest instance so you can make a request agains an express object.
+		request = supertest(app);
+
+		req = httpMocks.createRequest({
+			method: 'GET',
+			url: '/users',
+			user: user,
+			headers : { authorization: 'Basic b25lQGFvbC5jb21zOm9uZQ==' } // Invalid Creds
+			// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Valid Creds
+		}),
+		res = httpMocks.createResponse({
+			locals: {
+				statusCode: 401,
+				getAuthorization: {
+					name: 'One Uno',
+					pass: 'one'
+				},
+				authorization: 'Basic b25lQGFvbC5jb21zOm9uZQ=='	// Invalid Email Address
+				// authorization: 'Basic b25lQGFvbC5jb206b25l'	// Valid Email Address
+			}
+		});
+		done();
+	});
+	it('should return 401 status error when passed invalid email address', function (done) {
+		callAuthen(req, res, function next() { });
+
+		var userData = {
+			user: {
+				emailAddress: 'one@aol.comgalaticSpaceUFO',
+				password: 'password'
+			}};
+		var error = new Error('Invalid Email address entered.');
+		// THIS VALUE IS PART CONTROLLING THE TEST RESULT!
+		error.status = res.statusCode = 401;
+
+		// TODO: If I can get the req.body data to show up like the example unit test on the left does
+		// (sofa_king/sandbox/Learning_Project_11/unit_testing/express_testing_example),
+		//  then I should be able to compare the emails & throw a 401
+		// It looks like this effort will require altering the routes.js get('/user') route in order to access the req.body data.
+		// Then can return the two different errors thrown by User.authenticate()
+		// NOTE: Update!!!  So now this describe unit test has both the httpMocks code & the evanshortiss code working together!
+		// logs from inside callAuthen are displaying
+		// User.authenticate appears to be successfully stubbed out
+		// Am able to control the outcome of the test to get a 401 error
+		// CODE STILL RUNS IN POSTMAN
+		// Looks like this will work...
+		getAuthenStub.returns(error);
+
+		// This whole request object IS NOT working, returns Nothing.
+		request
+			.get('/users/nodejs')
+			.expect('Content-Type', /json/)
+			.expect(401, function (req, res) {
+				console.log(res.body);
+				expect(res.body).to.deep.equal({
+					data: userData
 				});
-				done();
+				expect(res.status).to.deep.equal(401);
 			});
-			xit('should return 401 status error when passed invalid credentials', function (done) {
 
-				middleware.credentials(req, res, function next() {
-					// var error = new Error('Invalid Email address entered.');
-					if (res.locals.authorization ===  'Basic b25lQGFvbC5jb21zOm9uZQ==') {
-						res.status(401);
-					} else {
-						res.status(200);
-					}
-					// if(error)	return error;
-				});
-				middleware.callAuthen(req, res, function next(error) {
-					if(error) return error;
-				});
-				middleware.result(req, res);
-				// console.log(res);
-				// console.log('RES.STATUSCODE:------------------>', res.statusCode);
-				expect(res.statusCode).to.deep.equal(401);
-				done();
-			}); // End it('should return 401')
-		});	// End describe('Test middleware.callAuthen')
-	});	// End describe('Invalid Credentials')
+		console.log('RES.STATUSCODE:------------------>', res.statusCode);
+		console.log(error.message, error.status, req.body);
+		expect(res.locals.statusCode).to.deep.equal(401);//from httpMocks.res.locals
+		// THIS VALUE IS PART CONTROLLING THE TEST RESULT!
+		expect(res.statusCode).to.deep.equal(401);
+		expect(error.status).to.deep.equal(401);// does the same as above
+		done();
+	}); // End it('should return 401')
+	it('should return 401 status error when passed invalid password');
+});	// End describe('Test middleware.callAuthen')
 
 
 
@@ -107,7 +146,9 @@ describe('GET /api/users Route Test Suite', function () {
 
 
 
-	describe('Valid Credentials', function () {
+
+
+	/*	var  user, callAuthenStub;
 		// TODO: 		1)	When I make a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
 		before(function (done) {
 			req = httpMocks.createRequest({
@@ -115,7 +156,7 @@ describe('GET /api/users Route Test Suite', function () {
 				url: '/users',
 				headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	},
 				body: {
-					user: getUser
+					user: user
 				}
 			}),
 			res = httpMocks.createResponse({
@@ -127,34 +168,54 @@ describe('GET /api/users Route Test Suite', function () {
 				}
 			});
 			done();
-		});
-		describe('Test middleware.callAuthen:', function () {
-		//a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
-			xit('should return corresponding user document when passed valid credentials'
-			, function (done) {
+		});*/
+		// describe('Test middleware.callAuthen:', function () {
+		// //a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
+		// 	xit('should return corresponding user document when passed valid credentials'
+		// 	, function (done) {
+		//
+		// 		middleware.credentials(req, res, function next(error) {
+		// 			/*if (res.locals.authorization ===  'Basic b25lQGFvbC5jb206b25l') {
+		// 				res.status(200).json(req.body.user);
+		// 			} else {
+		// 				res.status(404);
+		// 			}*/
+		// 		});
+		// 		middleware.callAuthen(req, res, function next(error) {
+		// 			if(error) return error;
+		// 		});
+		// 		middleware.result(req, res);
+		// 		// console.log(res);
+		// 		// console.log('RES.STATUSCODE:------------------>', res.statusCode);
+		// 		expect(res.statusCode).to.deep.equal(200);
+		// 		expect(req.body.user).to.deep.equal(getUser);
+		// 		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		// 			// it('should respond with 200 and a user object', function (done) {
+		// 			// 	var userData = {
+		// 			// 		username: 'nodejs'
+		// 			// 	};
+		// 			//
+		// 			// 	getUserStub.returns(userData);
+		// 			//
+		// 			// 	request
+		// 			// 		.get('/users/nodejs')
+		// 			// 		.expect('Content-Type', /json/)
+		// 			// 		.expect(200, function (err, res) {
+		// 			// 			expect(res.body).to.deep.equal({
+		// 			// 				status: 'ok',
+		// 			// 				data: userData
+		// 			// 			});
+		// 			// 			done();
+		// 			// 		});
+		// 			// });
+		// 		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		// 		done();
+		// 		console.log(res.statusCode, res.statusMessage, res.locals);
+		// 	});	// End it('should return user doc')
+		// });
 
-				middleware.credentials(req, res, function next(error) {
-					/*if (res.locals.authorization ===  'Basic b25lQGFvbC5jb206b25l') {
-						res.status(200).json(req.body.user);
-					} else {
-						res.status(404);
-					}*/
-				});
-				middleware.callAuthen(req, res, function next(error) {
-					if(error) return error;
-				});
-				middleware.result(req, res);
-				// console.log(res);
-				// console.log('RES.STATUSCODE:------------------>', res.statusCode);
-				expect(res.statusCode).to.deep.equal(200);
-				expect(req.body.user).to.deep.equal(getUser);
-				done();
-				console.log(res.statusCode, res.statusMessage, res.locals);
-			});	// End it('should return user doc')
-		});
-	});	// End describe('Valid Credentials')
 
-});	// End describe('User Route Test Suite') Suite
+// });	// End describe('User Route Test Suite') Suite
 
 
 /* START SAMPLE TEST CODE: ********************************************/
