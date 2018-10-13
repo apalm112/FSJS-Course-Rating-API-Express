@@ -30,26 +30,32 @@ var expect = chai.expect;
 
 
 	/**************************************************************************************	THIS TEST WORKS */
-/*		describe('Invalid Credentials:  Test middleware.credentials:', function () {
+		describe('Invalid Credentials passed to middleware.credentials()', function () {
 			var credentials = require('../src/routes/middleware').credentials;
 			var req, res;
 			before(function (done) {
 				req = httpMocks.createRequest({
 					method: 'GET',
 					url: '/api/users',
-					headers : { Authorization: 'Basic Og==' }	// Email & Password left empty
-				// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Good Creds
+					headers : { Authorization: 'Basic Og==' }	// Email & Password left empty in Basic Auth format from Postamn.
+					// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Valid Email & Password in Basic Auth format from Postman.
 				}),
 				res = httpMocks.createResponse({});
 				done();
 			});
 
 			it('should return 401 status error when passed no credentials', function (done) {
-				credentials(req, res, function next() {});
+				credentials(req, res, function next(error) { if(error){
+					res.locals.error = error;
+					return error;
+				}
+				});
 				expect(res.statusCode).to.deep.equal(401);
+				expect(res.locals.error.message).to.deep.equal('Email and password are required from custom middleware.');
+				expect(req.headers.authorization).to.deep.equal('Basic Og==');
 				done();
 			}); // End it('should return 401 when passed no credentials')
-		});  */// End describe('Test middleware.credentials:')
+		});  // End describe('Test middleware.credentials:')
 	/**************************************************************************************/
 
 
@@ -114,6 +120,7 @@ describe('Invalid Credentials:  Test middleware.callAuthen:', function () {
 		// Am able to control the outcome of the test to get a 401 error
 		// CODE STILL RUNS IN POSTMAN
 		// Looks like this will work...
+		// Need to add code for the getAuthenStub to take place of the User.authenticate() function.  Just need it to return errors.
 		getAuthenStub.returns(error);
 
 		// This whole request object IS NOT working, returns Nothing.
