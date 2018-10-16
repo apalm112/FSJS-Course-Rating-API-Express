@@ -68,7 +68,7 @@ $ mongoimport --db api --collection courses --type=json --jsonArray --file cours
     "title": "New Course Title",
     "description": "Lorem gibson euro-pop narrative Tessier-Ashpool rain realism human RAF assassin carbon sign shanty town sub-orbital ICE Tokyo.",
     "estimatedTime": "12 hours",
-    "materialsNeeded": "Lots of stuff",
+    "materialsNeeded": "A Dungeon Master and lots of other stuff",
     "steps": [
         {
             "stepNumber": 1,
