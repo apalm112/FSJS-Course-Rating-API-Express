@@ -87,7 +87,7 @@ UserSchema.pre('save', function(next) {
 	});
 });
 
-// Validation to prevent a user from reviewing their own course.  Which gets run when a new review is about to be inserted into the Review Collection. The `router.params` route gets the courseId, passes that into a method call to here, processes it & then sends it back.
+// Validation to prevent a user from reviewing their own course.  Runs before a new review is inserted into the Review Collection.
 ReviewSchema.method('validateReview', function(var1, var2, callback) {
 	var userIDObject = var1;
 	var userIdString = (JSON.stringify(userIDObject)).slice(1, 25);

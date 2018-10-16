@@ -70,7 +70,7 @@ router.get('/courses/:coursesId', (req, res) => {
 });
 
 // POST new individual Course. Creates a course, sets the Location header, and returns no content
-router.post('/courses', middle.credentials, (req, res, next) => {
+router.post('/courses', middle.credentials, middle.callAuthen, (req, res, next) => {
 	var course = new Course(req.body);
 	course.save(function(error, course) {
 		if(error) return next(error);
@@ -80,7 +80,7 @@ router.post('/courses', middle.credentials, (req, res, next) => {
 });
 
 // Updates a course by _id and returns no content.
-router.put('/courses/:coursesId', middle.credentials, (req, res, next) => {
+router.put('/courses/:coursesId', middle.credentials,  middle.callAuthen, (req, res, next) => {
 	req.course.update(req.body, function(error) {
 		if(error) return next(error);
 		res.redirect('/');	// Sets the location header.
@@ -88,21 +88,7 @@ router.put('/courses/:coursesId', middle.credentials, (req, res, next) => {
 	});
 });
 
-router.param('reviews', (req, res, next, id) => {
-	// This param route validates the incoming user _id.  Invalid id's get an error message, while valid id's are passed to the next middleware.  Param route uses mongodb navtive method to validate the ObjectId, sauce: https://stackoverflow.com/questions/11985228/mongodb-node-check-if-objectid-is-valid
-	// First capture the userId in the new review from inside the req.body object.
-	var getId = req.body.user;
-
-	if ( !objectID.isValid(getId) ) {
-		var error = new Error('USER ID is a Invalid Format!! router.param(reviews)');
-		error.status = 404;
-		return next(error);
-	} else {
-		return next();
-	}
-});
-
-router.post('/courses/:coursesId/:reviews', middle.credentials, (req, res, next) => {
+router.post('/courses/:coursesId/:reviews', middle.credentials,  middle.callAuthen, (req, res, next) => {
 	// Get the userId & modify it into a variable in order to pass it into the static method on the Course Schema.
 	var courseUserId = (JSON.stringify(req.course.user)).slice(8, 32);
 	var courseBeingPostedToId = req.course.id;
