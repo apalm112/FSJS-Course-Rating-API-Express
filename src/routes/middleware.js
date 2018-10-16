@@ -31,6 +31,7 @@ exports.credentials = function(req, res, next) {
 	var getAuthorization = auth(req);
 	// Get the user's email, (name = email), & password from the headers.
 	if (getAuthorization.name && getAuthorization.pass) {
+		res.locals.getAuthorization = getAuthorization;
 		return next();
 	} else {
 		var error = new Error('Email and password are required from custom middleware.');
@@ -45,11 +46,12 @@ exports.callAuthen = function(req, res, next) {
 // Calls the User Schema static method to authenticate the user.
 	User.authenticate(getAuthorization, function(error, user) {
 		if ( !user ) {
+			error.status = res.statusCode = 401;
 			return next(error);
 		} else {
 			res.locals.user = user.id;
 			req.body.user = user;
-			next();
+			return next();
 		}
 	});
 };
