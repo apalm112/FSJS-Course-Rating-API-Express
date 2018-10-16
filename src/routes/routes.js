@@ -22,7 +22,7 @@ router.get('/users', middle.credentials, middle.callAuthen, (req, res) =>{
 // Creates a user, sets the Location header to "/", and returns no content.
 router.post('/users', (req, res, next) => {
 	var user = new User(req.body);
-	user.save(function(error, users) {
+	user.save(function(error) {
 		if(error) return next(error);
 		res.redirect('/');
 		res.status(201);

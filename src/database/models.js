@@ -69,13 +69,9 @@ UserSchema.statics.authenticate = function(creds, callback) {
 };
 
 
-/* A pre save hook on the user schema that uses the bcrypt npm package encrypts the password property before saving it to the database */
+// A pre save hook on the user schema that uses the bcrypt npm package encrypts the password property before saving it to the database
 UserSchema.pre('save', function(next) {
-		/*
-				Due to the nature of this in an arrow function you can't use them for Mongoose hooks. this in arrow functions aren't rebindable, but Mongoose wants to rebind this to be the document being saved. You should use an anonymous function instead (i.e., function() {})
-				`.pre()` is Mongoose hook.
-				The data assigned to `this` in Mongoose's pre save hook function is the data that Mongoose will write to MongoDB.
-		 */
+	//	Due to the nature of this in an arrow function you can't use them for Mongoose hooks.
 	const saltRounds = 10;
 	var user = this;
 	// only hash the password if it has been modified or is new.

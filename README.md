@@ -1,5 +1,10 @@
 # FSJS Project #11: Course-Rating-API-Express
-A REST API using Express. The API will provide a way for users to review educational courses: users can see a list of courses in a database; add courses to the database; and add reviews for a specific course. This project uses REST API design, Node.js, and Express to create API routes, along with Mongoose and MongoDB for data modeling, validation, and persistence.
+This project uses REST API design, Node.js, and Express to create API routes, along with Mongoose and MongoDB for data modeling, validation, and persistence.  
+The API will provide a way for users to:
+* add a new user
+* review educational courses: users can see a list of courses in a database;
+* add courses to the database;
+* add reviews for a specific course.
 
 
 ## Installation
@@ -42,20 +47,38 @@ To POST a new user enter the data in this format:
 {
 	"fullName": 	    "Bob Jones",
 	"emailAddress":     "bob@aol.com",
-	"password": 	    "pass"
+	"password": 	    "password"
 }
 ```
 
-POST a new review in this format, where the `user` value is the users `_id`:
+POST a new review in this format, with valid email & password in Postmans Basic Auth:
 
 ```json
 {
-	"user":     "5ba97554b7116463fd924849",
 	"rating":     4,
 	"review":   "Here is a new review, such wow."
 }
 ```
 
-* Run the Tests in the console:
+* POST a new course
+
+```json
+{
+    "reviews": [],
+    "title": "New Course Title",
+    "description": "Lorem gibson euro-pop narrative Tessier-Ashpool rain realism human RAF assassin carbon sign shanty town sub-orbital ICE Tokyo.",
+    "estimatedTime": "12 hours",
+    "materialsNeeded": "Lots of stuff",
+    "steps": [
+        {
+            "stepNumber": 1,
+            "title": "Dungeon Financing with Blockchain",
+            "description": "Collect gold pieces."
+        }
+    ]
+}
+```
+
+* Run the Tests in the console with:
 
 `$ mocha`
