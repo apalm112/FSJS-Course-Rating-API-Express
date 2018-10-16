@@ -1,87 +1,74 @@
 'use strict';
-/*
- TODO: Tests have been written for the following user story:
-
-		1)	When I make a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
-
-		2)	When I make a request to the GET /api/users route with invalid credentials, a 401 status error is returned
-
-		Using the actual req and res objects that come from Express would fall more under integration tests. Unit test focus solely on your code and all other external dependencies should be mocked.
-
- */
+//		Using the actual req and res objects that come from Express would fall more under integration tests. Unit test focus solely on your code and all other external dependencies should be mocked.
 // Require modules
 var chai = require('chai'),
 	httpMocks = require('node-mocks-http'),
 	mongoose = require('mongoose'),
-	testgoose = require('testgoose'),
-	proxyquire = require('proxyquire'),	// .noCallThru()
-	sinon = require('sinon'),
-	express = require('express'),
-	supertest = require('supertest');
+	sinon = require('sinon');
 // Set Variables
 var expect = chai.expect;
 
 // Test Suite:  https://stackoverflow.com/a/34517121/6495470
 
-	/* To stop OverwriteModelError. Sauce: https://stackoverflow.com/a/43761258/6495470 */
-	for (let model in mongoose.models)
-		delete mongoose.models[model];
-	/* End of code block */
+/* To stop OverwriteModelError. Sauce: https://stackoverflow.com/a/43761258/6495470 */
+for (let model in mongoose.models)
+	delete mongoose.models[model];
+/* End of code block */
+
+/***********************************************************************************/
+describe('Invalid Credentials passed to middleware.credentials()', function () {
+	// Tests for whether or not the Email & Password values are empty.
+	var credentials = require('../src/routes/middleware').credentials;
+	var req, res;
+	before(function (done) {
+		req = httpMocks.createRequest({
+			method: 'GET',
+			url: '/api/users',
+			headers : { Authorization: 'Basic Og==' }	// Email & Password left empty in Basic Auth format from Postamn.  // Test passes.
+			// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Valid Email & Password in Basic Auth format from Postman.		// Test fails.
+		}),
+		res = httpMocks.createResponse({});
+		done();
+	});
+
+	it('should return 401 status error when passed no credentials', function (done) {
+		credentials(req, res, function next(error) { if(error){
+			res.locals.error = error;
+			return error;
+		}
+		});
+		expect(res.statusCode).to.deep.equal(401);
+		expect(res.locals.error.message).to.deep.equal('Email and password are required from custom middleware.');
+		expect(req.headers.authorization).to.deep.equal('Basic Og==');
+		done();
+	}); // End it('should return 401 when passed no credentials')
+}); // End describe('Test middleware.credentials:')
+/**************************************************************************************/
 
 
-	/**************************************************************************************	THIS TEST WORKS */
-		describe('Invalid Credentials passed to middleware.credentials()', function () {
-			var credentials = require('../src/routes/middleware').credentials;
-			var req, res;
-			before(function (done) {
-				req = httpMocks.createRequest({
-					method: 'GET',
-					url: '/api/users',
-					headers : { Authorization: 'Basic Og==' }	// Email & Password left empty in Basic Auth format from Postamn.
-					// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Valid Email & Password in Basic Auth format from Postman.
-				}),
-				res = httpMocks.createResponse({});
-				done();
-			});
-
-			it('should return 401 status error when passed no credentials', function (done) {
-				credentials(req, res, function next(error) { if(error){
-					res.locals.error = error;
-					return error;
-				}
-				});
-				expect(res.statusCode).to.deep.equal(401);
-				expect(res.locals.error.message).to.deep.equal('Email and password are required from custom middleware.');
-				expect(req.headers.authorization).to.deep.equal('Basic Og==');
-				done();
-			}); // End it('should return 401 when passed no credentials')
-		}); // End describe('Test middleware.credentials:')
-	/**************************************************************************************/
-
-
-describe('Invalid Credentials passed to middleware.callAuthen()', function () {
-	var callAuthen = require('../src/routes/middleware').callAuthen;
-	var app, getAuthenStub, request, route, check, req, res, validEmailArray, result, invalidEmail;
+describe('Invalid Email & Password', function () {
+	var email, invalidEmail, invalidPassword, getAuthenStub, password, req, res, validEmailArray, validPasswordArray;
 
 	before(function (done) {
-	// This variable holds the value to test for, either a valid or invalid email address.  Invalid ones will throw the 401 error status.  Valide ones will fail the test.
+	// These variables hold the values tested for, either a valid/invalid email address & password.  Invalid ones will throw the 401 error status, pass the test.  Valid ones will fail the test.
 		invalidEmail = 'ones@aol.com';
+		invalidPassword = '1233password';
 		validEmailArray = [ 'one@aol.com', 'two@aol.com' ];
-		result = validEmailArray.filter(email => email === invalidEmail);
-		// console.log(invalidEmail, result);
+		validPasswordArray = [ '123password', 'loginpassword', 'examplePass' ];
+		email = validEmailArray.filter(mail => mail === invalidEmail);
+		password = validPasswordArray.filter(pass => pass === invalidPassword);
 		// A stub you can use to control conditionals, here it is being used to stub out the UserSchema.statics.authenticate() method being called in the callAuthen() middleware.
 		getAuthenStub = sinon.stub();
 		req = httpMocks.createRequest({
 			validEmailArray: validEmailArray,
-			result: result,
+			email: email,
 			check: function() {
-				if ( result.pop() === undefined ) {
+				if ( (email.pop() === undefined) && (password.pop() === undefined) ) {
 					var error = new Error('Invalid Email address entered.');
 					error.status = res.statusCode = 401;
 					res.locals.error = error;
 					return error;
 				} else {
-					console.log('NO MATCH');
 					res.statusCode = 200;
 				}
 			}
@@ -89,139 +76,73 @@ describe('Invalid Credentials passed to middleware.callAuthen()', function () {
 	res = httpMocks.createResponse({});
 		done();
 	});
-	it('should return 401 status error when passed invalid email address', function (done) {
-		getAuthenStub.returns( 	req.check() );
+	it('should return 401 status error when passed invalid email or password', function (done) {
+		getAuthenStub.returns( req.check() );
 
-		// THIS VALUE IS PART CONTROLLING THE TEST RESULT!
 		expect(res.statusCode).to.deep.equal(401);
 		expect(res.locals.error.message).to.deep.equal('Invalid Email address entered.');
 		done();
 	}); // End it('should return 401')
-	it('should return 401 status error when passed invalid password');
-});	// End describe('Test middleware.callAuthen')
+});
+/**************************************************************************************/
 
+describe('Valid credentials', function () {
+	// TODO: 		1)	When I make a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
+	var email, invalidEmail, invalidPassword, getAuthenStub, password, req, res, validEmailArray, validPasswordArray;
 
-
-
-
-
-
-
-
-
-	/*	var  user, callAuthenStub;
-		// TODO: 		1)	When I make a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
-		before(function (done) {
-		// A stub you can use to control conditionals
+	before(function (done) {
+		// These variables hold the values tested for, either a valid/invalid email address & password.  Invalid ones will throw the 401 error status & fail the test.  Valid ones will pass the test.
+		invalidEmail = 'one@aol.com';
+		invalidPassword = '123password';
+		validEmailArray = [ 'one@aol.com', 'two@aol.com' ];
+		validPasswordArray = [ '123password', 'loginpassword', 'examplePass' ];
+		email = validEmailArray.filter(mail => mail === invalidEmail);
+		password = validPasswordArray.filter(pass => pass === invalidPassword);
+		// A stub you can use to control conditionals, here it is being used to stub out the UserSchema.statics.authenticate() method normally called in the callAuthen() middleware.
 		getAuthenStub = sinon.stub();
-		// Create an Express application object
-		app = express();
-		// Get the router module w/ stubbed out dependency, stub this out so you can control the results returned by the middleware module to ensure you execute all paths in your code
-		route = proxyquire('../src/routes/routes', {
-			'../database/models': { authenticate: getAuthenStub }
+		req = httpMocks.createRequest({
+			validEmailArray: validEmailArray,
+			email: email,
+			check: function() {
+				if ( (email.pop() === undefined) || (password.pop() === undefined) ) {
+					var error = new Error('Invalid Email address entered.');
+					error.status = res.statusCode = 401;
+					res.locals.error = error;
+					return error;
+				} else {
+					res.statusCode = 200;
+				}
+			}
+		}),
+		res = httpMocks.createResponse({
+			locals: {
+				authenticated: true,
+				email: 'nethack@aol.com',
+				password: 'huh',
+				authorization: 'Basic b25lQGFvbC5jb206b25l',
+				userData: {
+					_id: '5bbe4bea5c90b436b20e602c',
+					fullName: 'One Uno',
+					emailAddress: 'one@aol.com',
+					password: '$2b$10$4f8zjUTcj9fxrNEi7IGuDumozs4b4aGWtf608DarB0DJraEwYSnva',
+					__v: 0 }
+			}
 		});
-		// Bind a route to the application.
-		route(app);
-		// Get a supertest instance so you can make a request agains an express object.
-		request = supertest(app);
-			req = httpMocks.createRequest({
-				method: 'GET',
-				url: '/users',
-				headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	},
-				body: {
-					user: user
-				}
-			}),
-			res = httpMocks.createResponse({
-				locals: {
-					authenticated: true,
-					email: 'nethack@aol.com',
-					password: 'huh',
-					authorization: 'Basic b25lQGFvbC5jb206b25l'
-				}
-			});
-			done();
-		});*/
-		// describe('Test middleware.callAuthen:', function () {
-		// //a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
-		// 	xit('should return corresponding user document when passed valid credentials'
-		// 	, function (done) {
-		//
-		// 		middleware.credentials(req, res, function next(error) {
-		// 			/*if (res.locals.authorization ===  'Basic b25lQGFvbC5jb206b25l') {
-		// 				res.status(200).json(req.body.user);
-		// 			} else {
-		// 				res.status(404);
-		// 			}*/
-		// 		});
-		// 		middleware.callAuthen(req, res, function next(error) {
-		// 			if(error) return error;
-		// 		});
-		// 		middleware.result(req, res);
-		// 		// console.log(res);
-		// 		// console.log('RES.STATUSCODE:------------------>', res.statusCode);
-		// 		expect(res.statusCode).to.deep.equal(200);
-		// 		expect(req.body.user).to.deep.equal(getUser);
-		// 		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		// 			// it('should respond with 200 and a user object', function (done) {
-		// 			// 	var userData = {
-		// 			// 		username: 'nodejs'
-		// 			// 	};
-		// 			//
-		// 			// 	getUserStub.returns(userData);
-		// 			//
-		// 			// 	request
-		// 			// 		.get('/users/nodejs')
-		// 			// 		.expect('Content-Type', /json/)
-		// 			// 		.expect(200, function (err, res) {
-		// 			// 			expect(res.body).to.deep.equal({
-		// 			// 				status: 'ok',
-		// 			// 				data: userData
-		// 			// 			});
-		// 			// 			done();
-		// 			// 		});
-		// 			// });
-		// 		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		// 		done();
-		// 		console.log(res.statusCode, res.statusMessage, res.locals);
-		// 	});	// End it('should return user doc')
-		// });
-
-
-// });	// End describe('User Route Test Suite') Suite
-
-
-/* START SAMPLE TEST CODE: ********************************************/
-// Sauce: https://teamtreehouse.com/library/mocks-and-stubs
-// A new Test Suite:
-/*describe('Name_of_function_to_test', function () {
-
-	// At the top of the suite import the function which will be tested.
-	var Name_of_function_to_test = require('../src/routes/middleware').credentials;
-
-	// Create variables if you need them for testing, these can be functions too.
-	var thing;
-
-	// Hook to set up preconditions.
-	beforeEach(function () {
-		// Here you can set pretend functions that don't do real app logic.  They just return the values that you would expect the real working functions to produce.  SET UP THE RETURN VALUES TO BE ULTIMATELY WHAT YOU EXPECT THE FUNCTION TO RETURN WHEN THE APP IS COMPLETE.
-		// CUSTOM STUB:
-	 	thing = function () { return [ 401 ] };
-	// ^--now, no matter how you write `thing()` in the future, this test ensures that 'Name_of_function_to_test' does what you expect with the return value. This is your custom stub!
+		getAuthenStub = sinon.stub();
+		done();
 	});
 
-	// Start of Spec.
-	it('should return false or whatever you want here', function () {
-		// Make the `expect` to 'return false or whatever you want here.'
-		var result = Name_of_function_to_test(thing);
-		expect(result).to.be.false;
-	});	// End of Spec.
-	// ^--So now even though there is No working `thing()` function, you've set up the spec to pretend that those parts of the your code already work. That's the only important information this test needs.
-	// This test Spec will use your stub version of the `thing()` function.
+	it('should return corresponding user document when passed valid credentials'
+	, function (done) {
 
-	});*/ // End of Test Suite.
-// Next Step:  write the actual function & export it for testing.
-/* END SAMPLE TEST CODE ***********************************************/
+		getAuthenStub.returns( req.check() );
+
+		expect(res.statusCode).to.deep.equal(200);
+		expect(res.locals.userData).to.deep.equal(res.locals.userData);
+		done();
+	});
+});
+
 after(function () {
 	console.log('Test Suite completed.');
 });
