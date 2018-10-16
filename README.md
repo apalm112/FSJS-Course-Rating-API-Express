@@ -55,3 +55,7 @@ POST a new review in this format, where the `user` value is the users `_id`:
 	"review":   "Here is a new review, such wow."
 }
 ```
+
+* Run the Tests in the console:
+
+`$ mocha`
