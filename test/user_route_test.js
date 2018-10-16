@@ -1,6 +1,5 @@
 'use strict';
-//		Using the actual req and res objects that come from Express would fall more under integration tests. Unit test focus solely on your code and all other external dependencies should be mocked.
-// Require modules
+
 var chai = require('chai'),
 	httpMocks = require('node-mocks-http'),
 	mongoose = require('mongoose'),
@@ -8,12 +7,9 @@ var chai = require('chai'),
 // Set Variables
 var expect = chai.expect;
 
-// Test Suite:  https://stackoverflow.com/a/34517121/6495470
-
-/* To stop OverwriteModelError. Sauce: https://stackoverflow.com/a/43761258/6495470 */
+//  To stop OverwriteModelError. Sauce: https://stackoverflow.com/a/43761258/6495470
 for (let model in mongoose.models)
 	delete mongoose.models[model];
-/* End of code block */
 
 /***********************************************************************************/
 describe('Invalid Credentials passed to middleware.credentials()', function () {
@@ -24,8 +20,8 @@ describe('Invalid Credentials passed to middleware.credentials()', function () {
 		req = httpMocks.createRequest({
 			method: 'GET',
 			url: '/api/users',
-			headers : { Authorization: 'Basic Og==' }	// Email & Password left empty in Basic Auth format from Postamn.  // Test passes.
-			// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Valid Email & Password in Basic Auth format from Postman.		// Test fails.
+			headers : { Authorization: 'Basic Og==' }	// Email & Password left empty in Basic Auth format from Postamn.  Test passes.
+			// headers : {	authorization: 'Basic b25lQGFvbC5jb206b25l'	} // Valid Email & Password in Basic Auth format from Postman.  Test fails.
 		}),
 		res = httpMocks.createResponse({});
 		done();
@@ -41,8 +37,8 @@ describe('Invalid Credentials passed to middleware.credentials()', function () {
 		expect(res.locals.error.message).to.deep.equal('Email and password are required from custom middleware.');
 		expect(req.headers.authorization).to.deep.equal('Basic Og==');
 		done();
-	}); // End it('should return 401 when passed no credentials')
-}); // End describe('Test middleware.credentials:')
+	});
+});
 /**************************************************************************************/
 
 
@@ -57,7 +53,7 @@ describe('Invalid Email & Password', function () {
 		validPasswordArray = [ '123password', 'loginpassword', 'examplePass' ];
 		email = validEmailArray.filter(mail => mail === invalidEmail);
 		password = validPasswordArray.filter(pass => pass === invalidPassword);
-		// A stub you can use to control conditionals, here it is being used to stub out the UserSchema.statics.authenticate() method being called in the callAuthen() middleware.
+		// A stub you can use to control conditionals, here it is being used to stub out the UserSchema.statics.authenticate() method normally called in the callAuthen() middleware.
 		getAuthenStub = sinon.stub();
 		req = httpMocks.createRequest({
 			validEmailArray: validEmailArray,
@@ -82,12 +78,12 @@ describe('Invalid Email & Password', function () {
 		expect(res.statusCode).to.deep.equal(401);
 		expect(res.locals.error.message).to.deep.equal('Invalid Email address entered.');
 		done();
-	}); // End it('should return 401')
+	});
 });
 /**************************************************************************************/
 
 describe('Valid credentials', function () {
-	// TODO: 		1)	When I make a request to the GET /api/users route with the correct credentials, the corresponding user document is returned
+	// When a request to the GET /api/users route is made with the correct credentials, the corresponding user document is returned
 	var email, invalidEmail, invalidPassword, getAuthenStub, password, req, res, validEmailArray, validPasswordArray;
 
 	before(function (done) {
