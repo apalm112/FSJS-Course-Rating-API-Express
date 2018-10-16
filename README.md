@@ -41,7 +41,7 @@ $ mongoimport --db api --collection courses --type=json --jsonArray --file cours
 
 * Now you can use Postman to test the API routes, such as `GET localhost:5000/api/courses`.
 
-To POST a new user enter the data in this format:
+* POST a new user enter the data in this format:
 
 ```JSON
 {
@@ -51,7 +51,7 @@ To POST a new user enter the data in this format:
 }
 ```
 
-POST a new review in this format, with valid email & password in Postmans Basic Auth:
+* POST a new review in this format, with valid email & password in Postmans Basic Auth:
 
 ```json
 {
