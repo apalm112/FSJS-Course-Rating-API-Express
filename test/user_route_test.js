@@ -112,10 +112,6 @@ describe('Valid credentials', function () {
 		}),
 		res = httpMocks.createResponse({
 			locals: {
-				authenticated: true,
-				email: 'nethack@aol.com',
-				password: 'huh',
-				authorization: 'Basic b25lQGFvbC5jb206b25l',
 				userData: {
 					_id: '5bbe4bea5c90b436b20e602c',
 					fullName: 'One Uno',
