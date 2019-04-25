@@ -79,6 +79,8 @@ $ mongoimport --db api --collection courses --type=json --jsonArray --file cours
 }
 ```
 
-* Run the Tests in the console with:
+* Run the Tests in the console:
+
+`cd` into `test/`
 
 `$ npm test`
