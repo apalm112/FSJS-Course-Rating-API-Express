@@ -81,4 +81,4 @@ $ mongoimport --db api --collection courses --type=json --jsonArray --file cours
 
 * Run the Tests in the console with:
 
-`$ mocha`
+`$ npm test`
